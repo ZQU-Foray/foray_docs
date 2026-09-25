@@ -25,17 +25,9 @@
 |---|---|
 | [repo_decomposition_plan.md](engineering/repo_decomposition_plan.md) | **仓库解耦切割规划**：切割判据、起步 9 仓拓扑、版本锁定机制、组织规范对齐、迁移路径 |
 
-### `org/` — 组织规范材料
-
-回馈 [`ZQU-Foray/.github`](https://github.com/ZQU-Foray/.github) 的改动材料（分支已推送，待合并）。
-
-| 文件 | 内容 |
-|---|---|
-| [org/README.md](org/README.md) | 提交指引与当前状态 |
-| [org/CONTRIBUTING.addendum.md](org/CONTRIBUTING.addendum.md) | `CONTRIBUTING.md` 的增补内容 |
-| [org/ci-template.yml](org/ci-template.yml) | 新版 CI 模板（含 ROS 2 构建作业） |
-| [org/PR_BODY.md](org/PR_BODY.md) | 可直接粘贴的 PR 描述 |
-| [org/ROLLOUT.md](org/ROLLOUT.md) | ⭐ 组织规范**落地清单**（为什么规范没被执行、怎么让它生效） |
+> 组织规范层面的改动**不在本仓**——已直接提交为
+> [`ZQU-Foray/.github` PR #2](https://github.com/ZQU-Foray/.github/pull/2)，
+> 以 PR 为唯一载体，避免同一份内容两处维护。
 
 ---
 
