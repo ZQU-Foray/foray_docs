@@ -21,8 +21,19 @@
 | 仓库 | 说明 |
 |---|---|
 | [`ZQU-Foray/.github`](https://github.com/ZQU-Foray/.github) | 组织默认文件：贡献指南、Issue / PR 模板、CI 模板 |
-| [`foray_sentry_nav`](https://github.com/ZQU-Foray/foray_sentry_nav) | 哨兵导航栈（ROS 2 / Nav2），当前工作基线 |
 | [`ControllerCode`](https://github.com/ZQU-Foray/ControllerCode) | 电控代码：MC02 (H723) 与官方 C 板 (F407) |
+
+**上位机自研仓**（结构见 [`repository_structure.md`](repository_structure.md) §2）：
+
+[`foray_interfaces`](https://github.com/ZQU-Foray/foray_interfaces) ·
+[`foray_platform`](https://github.com/ZQU-Foray/foray_platform) ·
+[`foray_localization`](https://github.com/ZQU-Foray/foray_localization) ·
+[`foray_vision`](https://github.com/ZQU-Foray/foray_vision) ·
+[`foray_auto_aim`](https://github.com/ZQU-Foray/foray_auto_aim) ·
+[`foray_navigation`](https://github.com/ZQU-Foray/foray_navigation) ·
+[`foray_decision`](https://github.com/ZQU-Foray/foray_decision) ·
+[`foray_robots`](https://github.com/ZQU-Foray/foray_robots) ·
+[`foray_ws`](https://github.com/ZQU-Foray/foray_ws)
 
 ---
 

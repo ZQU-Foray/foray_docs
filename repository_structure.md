@@ -84,11 +84,11 @@
 | **地图资产先放 `foray_robots`（Git LFS）** | 地图随赛季变且是大文件（PCD 可达数十 MB）。起步期放装配根 + LFS 足够 |
 | **`foray_decision` 初期临时容纳对局仿真** | 对局仿真是离线工具、变更率高，长期应独立；起步期同一 owner 内，成熟后拆出 |
 
-### 2.2 命名修正
+### 2.2 命名修正（已执行）
 
-现有仓名 `foray_sentry_nav` 的语义是「**兵种_功能**」，隐含「哨兵专用」——而**导航恰恰要复用给步兵**，与复用目标直接冲突。
+原仓名 `foray_sentry_nav` 的语义是「**兵种_功能**」，隐含「哨兵专用」——而**导航恰恰要复用给步兵**，与复用目标直接冲突。
 
-> **改为按领域命名**：`foray_navigation`，兵种差异移到 `foray_robots/sentry_bringup`。
+> **按领域命名为 `foray_navigation`**（已改名），兵种差异移到 `foray_robots/sentry_bringup`。
 > 判据 C5：复用单元不得被兵种细节污染。
 
 ---
@@ -341,10 +341,33 @@ CI 校验：
 
 ## 10. 落地状态
 
+### 仓库
+
+**§2 的 9 个仓已全部建立**，每个仓已含：
+
+`README.md` · `AGENTS.md` · `plan.md` · `tree.md` · `decision.md` · `CODEOWNERS` · `.foray-layer` · `.gitignore` · `.github/workflows/ci.yml`
+
+| 仓 | 附加 |
+|---|---|
+| `foray_robots` | `.gitattributes`（Git LFS，场地资产） |
+| `foray_ws` | `.repos` · `VERSIONS.md` |
+
+### 组织工程
+
 | 项 | 状态 |
 |---|---|
-| 组织默认文件（`.github`） | PR #2：`CONTRIBUTING.md` 增补 + `ci-template.yml` 补 `build-ros2` |
-| team 仓库授权 | 算法组 → 算法类 7 仓 + `.github`/`foray_docs`；电控组 → `ControllerCode` + `.github`/`foray_docs` |
-| `dev` 分支 | 已建：`ControllerCode` · `Foray-HelloWorld` · `WebServer` · `foray_sentry_nav` |
-| 分支保护 | 已开：`.github` · `foray_docs` · `ControllerCode` · `Foray-HelloWorld` · `foray_sentry_nav`（PR + 1 approve）<br>轻量保护：4 个上游 fork 仓<br>不可用：`WebServer`（私有仓 + GitHub Free） |
-| 自研仓 | 全部未建（M1 未启动） |
+| 组织默认文件（`.github`） | CONTRIBUTING 多仓协作 + CI 模板（含 ROS 2 作业，**空仓自动跳过**） |
+| team 授权 | 算法组 → 9 个自研仓 + `.github`/`foray_docs`；电控组 → `ControllerCode` + `.github`/`foray_docs` |
+| 分支保护 | 9 个自研仓的 `main` + `dev`：PR + 1 approve · 禁强推 · 禁删除 |
+| 上游 fork 仓 | 轻量保护（仅禁强推/删除，**不要求 PR**——避免干扰 Sync fork） |
+| **规则真空** | `WebServer`——私有仓 + GitHub Free 不支持分支保护 |
+
+> ⚠️ 当前 `enforce_admins = false`，owner 可绕过保护规则。这是给刚起步的团队留的逃生口，
+> 流程跑顺后应改为 `true`。
+
+### 尚未开始
+
+- **M1**：`foray_interfaces` 最小契约集（裁判系统消息 + 机间态势协议）
+- **三份优先冻结契约**：世界模型接口 · 决策产物接口 · 机间态势协议
+- **区域划分设计准则**：粒度档数 · 边界 · 与导航 2D 栅格的对应
+- `foray_navigation` 的 `dev-rz` 遗留分支退役
