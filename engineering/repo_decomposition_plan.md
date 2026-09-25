@@ -347,10 +347,20 @@ CI 校验：
 
 ### 7.3 `CODEOWNERS`（建仓时必须一并提交）
 
-组织已有 `CODEOWNERS` 骨架，但**视觉 / 电控 / CI 三节为空**（全局仅 `* @队长用户名`）。
+> ⚠️ **纠正一处事实错误**：组织 `.github` 仓库里的 `CODEOWNERS` **不生效**。
+> GitHub 官方「默认社区健康文件」的支持列表为 CODE_OF_CONDUCT / CONTRIBUTING /
+> Discussion forms / FUNDING / Issue 与 PR 模板 / SECURITY / SUPPORT——
+> **不含 `CODEOWNERS`**。它必须放在**每个仓库自己**的 `.github/`、根目录或 `docs/` 下。
+> 因此 `ZQU-Foray/.github/CODEOWNERS` 那个「骨架」**从未在任何仓库生效**，
+> 视觉 / 电控 / CI 三节填空也不会改变任何行为。
 
 ⇒ 建新仓时**必须同时提交该仓的 `CODEOWNERS`**，按 §11.1 的 owner 填写，
 使 Review 自动分派到对应组长，而不是全部堆给队长。
+
+> ⚠️ **team 必须先有该仓的 Write 权限**，否则 CODEOWNERS 里的
+> `@ZQU-Foray/算法组` **静默失效**——官方明确：即使 team 成员个人已通过组织成员身份
+> 或其他 team 获得写权限，**team 本身仍须有该仓的 Write**。
+> 当前 `算法组` / `电控组` 两个 team 对所有仓**均无任何授权**，需先补。
 
 ### 7.4 元仓 `foray_ws` 额外需要
 

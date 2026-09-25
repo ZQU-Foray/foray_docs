@@ -66,6 +66,15 @@
 
 每个仓库必须包含 `CODEOWNERS`，把 Review 自动分派到对应方向负责人，
 **不要全部堆给队长**——多仓之后那会成为瓶颈。
+
+> ⚠️ **两个前提，缺一则静默失效**（官方文档核实）：
+> 1. **必须是每个仓库自己的 `CODEOWNERS`**。放在组织 `.github` 仓库里**不生效**——
+>    默认社区健康文件的支持列表**不含 `CODEOWNERS`**。它只能位于各仓的
+>    `.github/`、根目录或 `docs/`。
+> 2. **被引用的 team 必须先有该仓的 Write 权限**。官方原文：team「must have write
+>    permissions, **even if all the individual members of the team already have write
+>    permissions** directly, through organization membership, or through another team」。
+>    否则 `@ZQU-Foray/算法组` 不会被派发 review。
 ```
 
 ---

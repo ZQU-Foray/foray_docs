@@ -93,29 +93,71 @@ git push -u origin dev
 
 ## 3. 中优先级：`CODEOWNERS`
 
-当前 `.github/CODEOWNERS` 只有一行 `* @队长用户名`，视觉 / 电控 / CI 三节全空。
+> ⚠️ **先纠正一个常见误解（已查官方文档核实）**：
+> **`.github` 仓库里的 `CODEOWNERS` 不生效。**
+> GitHub 的「默认社区健康文件」支持列表是 CODE_OF_CONDUCT / CONTRIBUTING /
+> Discussion forms / FUNDING / Issue 与 PR 模板 / SECURITY / SUPPORT——
+> **`CODEOWNERS` 不在其中**。官方原文：CODEOWNERS 要放在**每个仓库自己**的
+> `.github/`、根目录或 `docs/` 下。
+>
+> 因此 `ZQU-Foray/.github/CODEOWNERS` 那个「骨架」**从未在任何仓库生效**，
+> 视觉 / 电控 / CI 三节填空也不会改变任何行为。
 
-⇒ **所有 PR 都堆给队长**。多仓之后这是瓶颈，且队长成为唯一单点。
-
-### 建议填充
+### 真正的动作：在**每个仓库**里放 `CODEOWNERS`
 
 ```gitignore
-# 全局兜底
+# 每个仓库自己的 CODEOWNERS（放在 .github/CODEOWNERS）
 *                       @队长用户名
 
-# 组织规范与 CI
-/.github/               @队长用户名
-CODEOWNERS              @队长用户名
-CONTRIBUTING.md         @队长用户名
-/workflows/             @队长用户名
-
-# 按方向（填入真实用户名或 team）
-# 视觉
-# 电控
+# 按方向填真实用户名或 team
+/vision/                @视觉负责人
+/control/               @电控负责人
 ```
 
-> 各仓库自己的 `CODEOWNERS` 更精细，但**组织级 `.github/CODEOWNERS` 优先级更低**，
-> 会被仓库内的覆盖——所以组织级只需做方向级兜底。
+### ⚠️ 第二个坑：CODEOWNERS 里的 team 必须有该仓的 **Write** 权限
+
+官方原文：
+
+> The people you choose as code owners must have write permissions for the repository.
+> When the code owner is a team, that team must be visible and it must have write
+> permissions, **even if all the individual members of the team already have write
+> permissions** directly, through organization membership, or through another team membership.
+
+当前 `算法组` / `电控组` 两个 team 对**所有仓库都没有任何授权**，
+所以即使写了 `* @ZQU-Foray/team` 也**不会派发 review**（静默失效）。
+
+⇒ 正确顺序：**先给 team 授权仓库 Write，再在 CODEOWNERS 里引用该 team**。
+
+---
+
+## 3.5 ⚠️ Free 计划的私有仓**开不了**分支保护
+
+实测（`gh api .../branches/main/protection`）：
+
+```
+foray_docs : 403 Upgrade to GitHub Pro or make this repository public to enable this feature.
+WebServer  : 403 Upgrade to GitHub Pro or make this repository public to enable this feature.
+```
+
+组织为 **GitHub Free** 计划。分支保护（protected branches）在：
+
+| 仓库可见性 | 分支保护 |
+|---|---|
+| **public** | ✅ 免费可用（只是尚未开启） |
+| **private** | ❌ **需 GitHub Pro / Team / Enterprise** |
+
+组织现状：10 个仓里 **8 个 public**（可开保护）· **2 个 private**
+（`foray_docs`、`WebServer` —— **开不了**）。
+
+⇒ **对私有仓，「不要在 main 上 push」只能靠人自觉，无法用工具强制。**
+这也解释了为什么第 1 步只提代码仓——但 `WebServer` 是私有代码仓，**处在规则真空里**。
+
+出路（三选一）：
+
+1. **申请 GitHub Education / Student Developer Pack** —— 学生组织可**免费**获得
+   GitHub Team，私有仓即可开分支保护（**最推荐**，成本为零）
+2. 把仓库改为 **public**（若确无敏感内容）
+3. 接受现状，私有仓靠 Review 惯例约束
 
 ---
 
@@ -128,7 +170,6 @@ CONTRIBUTING.md         @队长用户名
 | `foray_sentry_nav` | 待评估 | `README.md` 完善（层归属/快速开始/接口）+ `decision.md` + `tree.md` |
 | `ControllerCode` | 待评估 | `README.md` + `.clang-format` |
 | `WebServer` | 待评估 | `README.md` + `pyproject.toml` |
-| `.github` | 已有 `profile/README.md` | 补 `CODEOWNERS` 内容 |
 
 > 顺带一提：`CONTRIBUTING.md` 里「技术文档 → docs 仓库」指向
 > `https://github.com/ZQU-Foray/docs`，该仓库不存在（已实测）。
@@ -150,7 +191,9 @@ CONTRIBUTING.md         @队长用户名
   └─ 把 CI 模板铺到 foray_sentry_nav，确认能拦住一次真实编译错误
 
 第 3 步（本月）
-  └─ 补齐 CODEOWNERS（组织级 + 仓库级），解除队长单点
+  └─ 在每个仓库放 CODEOWNERS（⚠️ 组织级 .github/CODEOWNERS 无效）
+     先给「算法组 / 电控组」team 授该仓 Write，再在 CODEOWNERS 里引用
+  └─ 申请 GitHub Education 免费 Team，解锁私有仓分支保护
   └─ 其余代码仓补 dev 分支与分支保护
 
 第 4 步（随新仓建设）
