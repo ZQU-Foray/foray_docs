@@ -1,6 +1,7 @@
 # Foray 技术文档
 
 > 肇庆学院 Foray 战队 · RoboMaster
+> 远端仓库：[`ZQU-Foray/foray_docs`](https://github.com/ZQU-Foray/foray_docs)
 > 本仓集中存放**架构设计**与**工程协作**文档。
 
 ---
@@ -65,5 +66,5 @@
 
 遵循组织[贡献指南](https://github.com/ZQU-Foray/.github/blob/main/CONTRIBUTING.md)。
 
-> ⚠️ 组织规范要求**所有 PR 落到 `dev` 分支**。本仓若建立远端仓库，
-> 请一并创建 `dev` 分支并设置分支保护。
+> ✅ **本仓属于「文档类仓库」**（以 Markdown / 配置为主、**不含构建产物**），
+> 按组织规范**不需要三级分支模型**——直接在 `main` 上提交、直接 PR 到 `main` 即可。

@@ -12,20 +12,28 @@ Conventional Commits、分支模型、Review 要求、代码风格、Issue/PR �
 
 **问题不在内容，在落地。** 实测现状：
 
-| 仓库 | `dev` 分支 | CI 配置 | `CODEOWNERS` | 按规范的分支命名 |
-|---|---|---|---|---|
-| `.github` | ❌ 无 | — | 骨架（三节为空） | — |
-| `ControllerCode` | ❌ 无 | ❓ | ❓ | — |
-| `foray_sentry_nav` | ❌ 无（只有 `dev-rz` `fork`） | ❓ | ❓ | ❌ `dev-rz` 非 `feat/xxx` |
-| `WebServer` | ❌ 无 | ❓ | ❓ | — |
-| `Foray-HelloWorld` | ❌ 无（只有 `main`） | ❓ | ❓ | ❌ `linnan/ros-check` 非 `feat/xxx` |
+| 仓库 | 类型 | `dev` 分支 | CI 配置 | `CODEOWNERS` | 按规范的分支命名 |
+|---|---|---|---|---|---|
+| `.github` | 文档 | ➖ 不需要 | — | 骨架（三节为空） | — |
+| `foray_docs` | 文档 | ➖ 不需要 | ❓ | ❓ | — |
+| `ControllerCode` | 代码 | ❌ **缺** | ❓ | ❓ | — |
+| `foray_sentry_nav` | 代码 | ❌ **缺**（只有 `dev-rz` `fork`） | ❓ | ❓ | ❌ `dev-rz` 非 `feat/xxx` |
+| `WebServer` | 代码 | ❌ **缺** | ❓ | ❓ | — |
+| `Foray-HelloWorld` | 代码 | ❌ **缺**（只有 `main`） | ❓ | ❓ | ❌ `linnan/ros-check` 非 `feat/xxx` |
 
-⇒ **规范里写的三层分支模型，全组织一处都没实现。** 所有仓库只有 `main`。
+⇒ **规范里写的三层分支模型，全组织一处都没实现。** 所有**代码仓**都只有 `main`。
+（文档类仓库按规范不需要 `dev`，见「例外」一节。）
 
 这解释了一个常见现象：规范发布时大家看过，但**第一个 PR 就绕过去了**（因为
 `dev` 不存在，只能 PR 到 `main`），之后规范就只是文档。
 
 > **规范的生命力取决于第一次执行是否顺畅。** 所以落地比增补更重要。
+
+### 例外：文档类仓库不需要 `dev`
+
+以 Markdown / 配置为主、**不含构建产物**的仓库（`.github`、`foray_docs`）
+直接在 `main` 上工作即可。判据是「**有没有可构建的东西**」——
+三级分支的价值在于隔离可能构建失败的开发中代码，文档没有这个风险。
 
 ---
 
@@ -33,10 +41,10 @@ Conventional Commits、分支模型、Review 要求、代码风格、Issue/PR �
 
 这是**唯一一件做完就能让后续所有协作自动合规**的事。
 
-### 对每个活跃仓库执行
+### 对每个**代码类**活跃仓库执行
 
 ```bash
-# 建 dev 分支
+# 建 dev 分支（文档类仓库跳过这一步）
 git checkout main && git pull
 git checkout -b dev
 git push -u origin dev
@@ -44,16 +52,17 @@ git push -u origin dev
 
 然后在 GitHub **Settings → Branches → Add branch protection rule**：
 
-| 分支 | 保护设置 |
-|---|---|
-| `main` | ✅ 禁止直接 push ✅ 禁止 force push ✅ 要求 PR ✅ 要求 1 个 approve |
-| `dev` | ✅ 禁止直接 push ✅ 要求 PR ✅ 要求 1 个 approve |
+| 仓库类型 | `main` 保护 | `dev` 保护 |
+|---|---|---|
+| **代码仓** | ✅ 禁止直接 push ✅ 禁止 force push ✅ 要求 PR ✅ 要求 1 个 approve | ✅ 禁止直接 push ✅ 要求 PR ✅ 要求 1 个 approve |
+| **文档仓** | ✅ 禁止 force push ✅ 要求 PR（可放宽 approve 数） | ➖ 不建该分支 |
 
 > `CONTRIBUTING.md` 说「不要在 main 分支进行任何 push 和 merge」——
 > **光靠这句话是拦不住的，必须由分支保护强制执行。**
 > 规范文档负责「让人知道」，分支保护负责「让人做不到」。
 
-**建议顺序**：`.github` → `foray_sentry_nav` → `ControllerCode` → `WebServer`
+**建议顺序**：`foray_sentry_nav` → `ControllerCode` → `WebServer`
+（`.github` 与 `foray_docs` 是文档仓，只需给 `main` 开基本保护）
 
 ---
 
@@ -122,25 +131,27 @@ CONTRIBUTING.md         @队长用户名
 | `.github` | 已有 `profile/README.md` | 补 `CODEOWNERS` 内容 |
 
 > 顺带一提：`CONTRIBUTING.md` 里「技术文档 → docs 仓库」指向
-> `https://github.com/ZQU-Foray/docs`，但该仓库当前返回 404（未建或私有）。
-> 要么建它，要么改掉这个链接，避免新队员点进去是死链。
+> `https://github.com/ZQU-Foray/docs`，该仓库不存在（已实测）。
+> 战队现已建立 [`ZQU-Foray/foray_docs`](https://github.com/ZQU-Foray/foray_docs)，
+> 建议把该链接改为它，避免新队员点进去是死链。
 
 ---
 
 ## 5. 建议的执行顺序（一页）
 
 ```
-第 1 步（今天，30 分钟）
-  └─ 为 .github 与 foray_sentry_nav 建 dev 分支 + 分支保护
-     ⇒ 从这一刻起，所有 PR 自动落在 dev，规范开始自我执行
+第 1 步（今天，30 分钟）★ 最高杠杆
+  └─ 为「代码类」仓库建 dev 分支 + 分支保护：foray_sentry_nav → ControllerCode → WebServer
+     ⇒ 从这一刻起，所有代码 PR 自动落在 dev，规范开始自我执行
+  └─ 文档类仓库（.github / foray_docs）无需 dev，给 main 开基本保护即可
 
 第 2 步（本周）
-  └─ 合并本目录的 CONTRIBUTING + CI 补丁
+  └─ 合并 .github 的 CONTRIBUTING + CI 补丁
   └─ 把 CI 模板铺到 foray_sentry_nav，确认能拦住一次真实编译错误
 
 第 3 步（本月）
   └─ 补齐 CODEOWNERS（组织级 + 仓库级），解除队长单点
-  └─ 其余仓库补 dev 分支与分支保护
+  └─ 其余代码仓补 dev 分支与分支保护
 
 第 4 步（随新仓建设）
   └─ 按项目文档 §11.2 的 Checklist 建新仓，一步到位
