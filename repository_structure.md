@@ -36,6 +36,18 @@
 
 **依赖方向严格自上而下。** `foray_interfaces` 为最底层，零自研依赖。
 
+**下位机在分层之外。** `ControllerCode`（MCU 固件）位于 L2 下行 HAL **之下**，
+不属于 L1–L5。它同样只依赖 `foray_interfaces`——消费其生成的协议头文件：
+
+```
+   上位机                                    下位机
+foray_platform  ────── USB CDC ──────►  ControllerCode
+      │                                       │
+      └──────►  foray_interfaces  ◄───────────┘
+              （两侧共用同一份生成的头文件，
+                线协议定义见 protocol/lower_link.yaml）
+```
+
 ---
 
 ## 1. 切割判据
@@ -66,7 +78,7 @@
 
 | # | 仓库 | 层/面 | 内容 | Owner | 变更率 |
 |---|---|---|---|---|---|
-| 1 | `foray_interfaces` | **X2 契约** | 全部 msg/srv/action：机内接口 + 机间态势协议 + 裁判系统消息 | 架构 | 极低 |
+| 1 | `foray_interfaces` | **X2 契约** | 全部 msg/srv/action：机内接口 + 机间态势协议 + 裁判系统消息；**上位机 ↔ 下位机链路协议**（含机器可读定义与生成物） | 架构 | 极低 |
 | 2 | `foray_platform` | **L1 + L2-HAL** | 时间时钟 · 数学/滤波 · 参数系统 · 日志录制 · 错误码 + 下行 HAL（底盘/云台/发射/串口/CAN/传感器封装） | 平台 | 低 |
 | 3 | `foray_localization` | **L3** | 定位服务（内置地图 + 激光配准）· 地图管理 · 配准残差动态物体检测 | 导航 | 高 |
 | 4 | `foray_vision` | **L3** | 目标感知（装甲板检测/跟踪）· 态势融合 · WorldSnapshot 生成 | 视觉 | 高 |
@@ -249,7 +261,7 @@ CI 校验：
 
 | 仓 | scope |
 |---|---|
-| `foray_interfaces` | `msg` `srv` `action` `referee` `comms` `map` |
+| `foray_interfaces` | `msg` `srv` `action` `referee` `comms` `map` `protocol` `link` |
 | `foray_platform` | `time` `math` `param` `log` `hal` `chassis` `gimbal` `shooter` `serial` `can` |
 | `foray_localization` | `map` `relocalize` `icp` `residual` `tf` |
 | `foray_vision` | `detector` `classifier` `preprocess` `tracker` `fusion` `snapshot` |
@@ -311,7 +323,7 @@ CI 校验：
 
 | 步 | 动作 | 产出 |
 |---|---|---|
-| **M1** | 建 `foray_interfaces`，写入最小集：裁判系统消息 + 机间态势协议 | 契约先立 |
+| **M1** | 建 `foray_interfaces`，写入最小集：裁判系统消息 + 机间态势协议 + **上位机↔下位机链路协议** | 契约先立；下位机协议**阻塞电控组**，优先级最高 |
 | **M2** | 建 `foray_ws`，用 `.repos` 把上游包 pin 住（此时全是第三方） | 可复现的基线 |
 | **M3** | 把当前 fork 也作为元仓里的一个 pin 项 | 基线含现状 |
 | **M4** | 按依赖顺序逐个替换为自研仓：`platform` → `localization` → `navigation` → `vision` → `auto_aim` → `decision` | 每替换一个，元仓里摘掉对应上游项 |
