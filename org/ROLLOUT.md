@@ -123,10 +123,17 @@ git push -u origin dev
 > permissions, **even if all the individual members of the team already have write
 > permissions** directly, through organization membership, or through another team membership.
 
-当前 `算法组` / `电控组` 两个 team 对**所有仓库都没有任何授权**，
-所以即使写了 `* @ZQU-Foray/team` 也**不会派发 review**（静默失效）。
+✅ **授权已完成**——两个 team 现在都具备 Write 及以上，满足 CODEOWNERS 前提：
 
-⇒ 正确顺序：**先给 team 授权仓库 Write，再在 CODEOWNERS 里引用该 team**。
+| team | 成员 | 授权范围 |
+|---|---|---|
+| `算法组` | 4 | 算法类 7 仓 + `.github`、`foray_docs` |
+| `电控组` | 5 | `ControllerCode` + `.github`、`foray_docs` |
+
+> ⚠️ **`PUT /orgs/{org}/teams/{slug}/repos/{repo}` 是覆盖语义**：用它授 `push`
+> 会把原有的 `maintain` **降级**。给已有更高权限的仓重复授权时，必须显式写回原级别。
+
+⇒ 接下来才是真正的一步：**在每个仓库放 `CODEOWNERS`，引用对应的 team**。
 
 ---
 

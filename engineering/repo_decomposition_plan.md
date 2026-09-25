@@ -360,7 +360,16 @@ CI 校验：
 > ⚠️ **team 必须先有该仓的 Write 权限**，否则 CODEOWNERS 里的
 > `@ZQU-Foray/算法组` **静默失效**——官方明确：即使 team 成员个人已通过组织成员身份
 > 或其他 team 获得写权限，**team 本身仍须有该仓的 Write**。
-> 当前 `算法组` / `电控组` 两个 team 对所有仓**均无任何授权**，需先补。
+>
+> ✅ **授权已完成**（`PUT /orgs/{org}/teams/{slug}/repos/{owner}/{repo}`）：
+>
+> | team | 成员 | 授权范围 |
+> |---|---|---|
+> | `算法组` | 4 | 算法类 7 仓（`foray_sentry_nav`、`Foray-HelloWorld` 为 **`maintain`**，其余 5 仓为 **`write`**）+ `.github`、`foray_docs` |
+> | `电控组` | 5 | `ControllerCode`（`write`）+ `.github`、`foray_docs` |
+>
+> ⚠️ **`PUT` 是覆盖语义**：用 `permission=push` 重复授权会把已有的 `maintain`
+> **降级**。对已有更高权限的仓，需显式写回原级别。
 
 ### 7.4 元仓 `foray_ws` 额外需要
 
