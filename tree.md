@@ -2,47 +2,39 @@
 
 ```
 foray_docs/
-├── README.md                           总索引与阅读顺序
-├── tree.md                             本文件：目录结构说明
-├── architecture/                       上位机算法架构
-│   ├── architecture_diagram.md         算法结构设计图（主图 + 3 张补充视图 + 速查）
-│   ├── upper_computer_architecture.md  架构决策记录（为什么这么设计）
-│   └── decision_layer_plan.md          决策层接口规范与执行计划（具体怎么做）
-└── engineering/                        工程与协作
-    └── repo_decomposition_plan.md      仓库解耦切割规划
+├── README.md                 总索引
+├── tree.md                   本文件：目录结构说明
+├── algorithm_structure.md    算法结构
+└── repository_structure.md   仓库结构
 ```
 
 ---
 
 ## 按问题找文档
 
-| 你想知道 | 看哪份 |
-|---|---|
-| 整体架构长什么样？ | `architecture/architecture_diagram.md` |
-| 为什么要这样分层？ | `architecture/upper_computer_architecture.md` |
-| 决策层接口怎么定？ | `architecture/decision_layer_plan.md` |
-| 仓库怎么切、怎么协作？ | `engineering/repo_decomposition_plan.md` |
-| 组织规范要改什么？ | [`.github` PR #2](https://github.com/ZQU-Foray/.github/pull/2)（不在本仓） |
+| 你想知道 | 看哪份 | 章节 |
+|---|---|---|
+| 整体分几层、各层职责 | `algorithm_structure.md` | §1 分层骨架 |
+| 世界模型怎么形成 | `algorithm_structure.md` | §2 世界模型 |
+| 决策层接口怎么定 | `algorithm_structure.md` | §3 决策层 |
+| RL 放在哪个位置 | `algorithm_structure.md` | §4 离线开发闭环 |
+| 三份必须优先冻结的契约 | `algorithm_structure.md` | §5 关键契约 |
+| 仓库怎么切、依赖方向 | `repository_structure.md` | §0–§3 拓扑与判据 |
+| 版本怎么锁 | `repository_structure.md` | §5 版本锁定 |
+| 分支 / 提交 / CI 规范 | `repository_structure.md` | §6 协作规范 |
+| 从现有 fork 怎么过渡 | `repository_structure.md` | §8 迁移路径 |
 
 ---
 
 ## 文档关系
 
 ```
-architecture_diagram.md          ← 入口：一张图看懂结构（宣讲首选）
+algorithm_structure.md          算法长什么样（分层 · 世界模型 · 决策接口）
         │
-        ├── 论证依据 ──► upper_computer_architecture.md
-        │                （分层理由、3v3 裁剪、三项决议、RL 评估、
-        │                  开火授权安全语义、撤销记录）
+        │  按这套结构切仓
+        ▼
+repository_structure.md         仓怎么切、怎么协作、怎么发布
         │
-        └── 落地细节 ──► decision_layer_plan.md
-                         （接口字段清单、对局仿真建模、红队流程、
-                           数据采集、赛后闭环、序时计划）
-
-repository 层面 ────────► engineering/repo_decomposition_plan.md
-                         （切割判据、起步 9 仓、版本锁定、组织规范对齐、
-                           迁移六步、验收标准、决议记录 D1–D7）
-
-组织规范层面 ──────────► 不在本仓，见 ZQU-Foray/.github PR #2
-                         （CONTRIBUTING 增补、CI 模板）
+        ▼
+ZQU-Foray/*                     具体仓库
 ```
