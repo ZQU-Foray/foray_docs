@@ -60,7 +60,7 @@
 
 ---
 
-## 2. 起步期：9 仓
+## 2. 起步期：10 仓
 
 一次切 14 个仓会杀死推进力。先立骨架，成熟后再拆。
 
@@ -75,6 +75,11 @@
 | 7 | `foray_decision` | **L5 + L2横向 + X5** | 战术层(规则/RL) · 技能层 · 安全门 · 机间协同 · 对局仿真（临时） | 决策 | 高 |
 | 8 | `foray_robots` | **R + 地图资产** | 兵种装配根（`sentry_bringup` / `infantry_bringup`）· 参数 · 场地资产（LFS） | 集成 | 中 |
 | 9 | `foray_ws` | **元仓** | `.repos` · 顶层文档 · 集成 CI · 一键脚本。零业务代码 | 架构 | 极低 |
+| 10 | `foray_ml` | **T（离线工具层）** | 训练/数据/导出产线：抽帧 · 标注管理 · 小模型预标注 · 训练 · ONNX 导出 · 模型契约（原个人仓 `ctts` 迁入） | 视觉 | 中 |
+
+> 2026-10-23 新增 `foray_ml`：由个人仓 `ctts`（CNN Train Tools Set）迁入，保留原提交历史；
+> 职责是模型产线（数据 → 标注 → 预标注 → 训练 → 导出 → 契约），实时推理仍在 `foray_vision`。
+> 因离线工具不属于 X2/L1–L5，其 `.foray-layer` 声明为 `T`；成熟期各仓编号相应顺延。
 
 ### 2.1 三处取舍
 
@@ -97,11 +102,11 @@
 
 | # | 新增仓 | 从哪拆出 | 触发条件 |
 |---|---|---|---|
-| 10 | `foray_field` | `foray_robots` 的场地资产 | 地图资产体积/版本频率成为负担 |
-| 11 | `foray_comms` | `foray_decision` 的机间协同 | 机间协议迭代频繁，或需开放给其他队 |
-| 12 | `foray_battle_sim` | `foray_decision` 的对局仿真 | 红队 RL 正式立项 |
-| 13 | `foray_calibration` | `foray_platform` / 各仓零散标定脚本 | 标定需要现场独立运行 |
-| 14 | `foray_debug` | 各仓的调试装配根 | 调试根数量膨胀 |
+| 11 | `foray_field` | `foray_robots` 的场地资产 | 地图资产体积/版本频率成为负担 |
+| 12 | `foray_comms` | `foray_decision` 的机间协同 | 机间协议迭代频繁，或需开放给其他队 |
+| 13 | `foray_battle_sim` | `foray_decision` 的对局仿真 | 红队 RL 正式立项 |
+| 14 | `foray_calibration` | `foray_platform` / 各仓零散标定脚本 | 标定需要现场独立运行 |
+| 15 | `foray_debug` | 各仓的调试装配根 | 调试根数量膨胀 |
 
 > **拆仓是「因为痛了才拆」，不是「因为整齐才拆」。** 每个新仓必须能回答「不拆会怎样」。
 
@@ -258,6 +263,7 @@ CI 校验：
 | `foray_decision` | `tactic` `skill` `safety` `gate` `comms` `rl` `sim` |
 | `foray_robots` | `sentry` `infantry` `params` `launch` `field` |
 | `foray_ws` | `deps` `ci` `docs` `scripts` |
+| `foray_ml` | `data` `label` `prelabel` `train` `export` `eval` `model` |
 | `<upstream>-foray-fork` | 不提交（只 pin） |
 
 ---
@@ -343,7 +349,7 @@ CI 校验：
 
 ### 仓库
 
-**§2 的 9 个仓已全部建立**，每个仓已含：
+**§2 的 10 个仓已全部建立**，每个仓已含：
 
 `README.md` · `AGENTS.md` · `plan.md` · `tree.md` · `decision.md` · `CODEOWNERS` · `.foray-layer` · `.gitignore` · `.github/workflows/ci.yml`
 
@@ -357,8 +363,8 @@ CI 校验：
 | 项 | 状态 |
 |---|---|
 | 组织默认文件（`.github`） | CONTRIBUTING 多仓协作 + CI 模板（含 ROS 2 作业，**空仓自动跳过**） |
-| team 授权 | 算法组 → 9 个自研仓 + `.github`/`foray_docs`；电控组 → `ControllerCode` + `.github`/`foray_docs` |
-| 分支保护 | 9 个自研仓的 `main` + `dev`：PR + 1 approve · 禁强推 · 禁删除 |
+| team 授权 | 算法组 → 10 个自研仓 + `.github`/`foray_docs`；电控组 → `ControllerCode` + `.github`/`foray_docs` |
+| 分支保护 | 10 个自研仓的 `main` + `dev`：PR + 1 approve · 禁强推 · 禁删除 |
 | 上游 fork 仓 | 轻量保护（仅禁强推/删除，**不要求 PR**——避免干扰 Sync fork） |
 | **规则真空** | `WebServer`——私有仓 + GitHub Free 不支持分支保护 |
 
