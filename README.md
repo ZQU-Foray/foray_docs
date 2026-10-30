@@ -34,7 +34,9 @@
 [`foray_navigation`](https://github.com/ZQU-Foray/foray_navigation) ·
 [`foray_decision`](https://github.com/ZQU-Foray/foray_decision) ·
 [`foray_robots`](https://github.com/ZQU-Foray/foray_robots) ·
-[`foray_ws`](https://github.com/ZQU-Foray/foray_ws)
+[`foray_ws`](https://github.com/ZQU-Foray/foray_ws) ·
+[`foray_ml`](https://github.com/ZQU-Foray/foray_ml) ·
+[`foray_simulation`](https://github.com/ZQU-Foray/foray_simulation)
 
 ---
 

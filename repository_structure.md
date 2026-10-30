@@ -60,7 +60,7 @@
 
 ---
 
-## 2. 起步期：10 仓
+## 2. 起步期：11 仓
 
 一次切 14 个仓会杀死推进力。先立骨架，成熟后再拆。
 
@@ -76,18 +76,24 @@
 | 8 | `foray_robots` | **R + 地图资产** | 兵种装配根（`sentry_bringup` / `infantry_bringup`）· 参数 · 场地资产（LFS） | 集成 | 中 |
 | 9 | `foray_ws` | **元仓** | `.repos` · 顶层文档 · 集成 CI · 一键脚本。零业务代码 | 架构 | 极低 |
 | 10 | `foray_ml` | **T（离线工具层）** | 训练/数据/导出产线：抽帧 · 标注管理 · 小模型预标注 · 训练 · ONNX 导出 · 模型契约（原个人仓 `ctts` 迁入） | 视觉 | 中 |
+| 11 | `foray_simulation` | **META（仿真支撑）** | 交付可直接跑的世界：场地几何与在环世界（Fortress）· 机器人模型与 gz 桥 · 定位/寻址装配（point_lio + 定位服务）· 先验点云与清单契约 · 一键起整链 | 集成 | 中 |
 
 > 2026-10-23 新增 `foray_ml`：由个人仓 `ctts`（CNN Train Tools Set）迁入，保留原提交历史；
 > 职责是模型产线（数据 → 标注 → 预标注 → 训练 → 导出 → 契约），实时推理仍在 `foray_vision`。
 > 因离线工具不属于 X2/L1–L5，其 `.foray-layer` 声明为 `T`；成熟期各仓编号相应顺延。
+>
+> 2026-10-30 新增 `foray_simulation`：仿真器不是算法分层的一环，而是**算法链的验收环境**，
+> 故 `.foray-layer` 声明为 `META`（与元仓同类、不参与层级序，依赖列表为空）。
+> 它不实现定位/导航算法，只装配上游节点并给出可复现的场地与判据。
 
-### 2.1 三处取舍
+### 2.1 取舍清单
 
 | 取舍 | 理由 |
 |---|---|
 | **L1 与 L2-HAL 合并为 `foray_platform`** | 都是「被所有人依赖的底层」、变更率都低、owner 同属平台组。符合 C2/C3 |
 | **地图资产先放 `foray_robots`（Git LFS）** | 地图随赛季变且是大文件（PCD 可达数十 MB）。起步期放装配根 + LFS 足够 |
 | **`foray_decision` 初期临时容纳对局仿真** | 对局仿真是离线工具、变更率高，长期应独立；起步期同一 owner 内，成熟后拆出 |
+| **仿真世界与场地几何放 `foray_simulation`，真机地图资产仍放 `foray_robots`（LFS）** | 仿真器要交付「一条命令就能跑起来的世界」，世界与网格必须与代码同版本、可直接 diff 与复现；而真机用的是随赛季变的定位先验（PCD）与场地打包资产，体积大、频率高，仍归装配根 + LFS。两者不冲突：官方栅格同源，`foray_simulation` 的 A5 断言（点云投影 vs 官方 PGM 的 IoU ≥ 0.90）保证仿真世界与真机地图是同一块场地 |
 
 ### 2.2 命名修正（已执行）
 
@@ -98,15 +104,15 @@
 
 ---
 
-## 3. 成熟期：+5 仓
+## 3. 成熟期：+5 仓（编号接起步期 #11，故从 #12 起）
 
 | # | 新增仓 | 从哪拆出 | 触发条件 |
 |---|---|---|---|
-| 11 | `foray_field` | `foray_robots` 的场地资产 | 地图资产体积/版本频率成为负担 |
-| 12 | `foray_comms` | `foray_decision` 的机间协同 | 机间协议迭代频繁，或需开放给其他队 |
-| 13 | `foray_battle_sim` | `foray_decision` 的对局仿真 | 红队 RL 正式立项 |
-| 14 | `foray_calibration` | `foray_platform` / 各仓零散标定脚本 | 标定需要现场独立运行 |
-| 15 | `foray_debug` | 各仓的调试装配根 | 调试根数量膨胀 |
+| 12 | `foray_field` | `foray_robots` 的场地资产 | 地图资产体积/版本频率成为负担 |
+| 13 | `foray_comms` | `foray_decision` 的机间协同 | 机间协议迭代频繁，或需开放给其他队 |
+| 14 | `foray_battle_sim` | `foray_decision` 的对局仿真 | 红队 RL 正式立项 |
+| 15 | `foray_calibration` | `foray_platform` / 各仓零散标定脚本 | 标定需要现场独立运行 |
+| 16 | `foray_debug` | 各仓的调试装配根 | 调试根数量膨胀 |
 
 > **拆仓是「因为痛了才拆」，不是「因为整齐才拆」。** 每个新仓必须能回答「不拆会怎样」。
 
@@ -264,6 +270,7 @@ CI 校验：
 | `foray_robots` | `sentry` `infantry` `params` `launch` `field` |
 | `foray_ws` | `deps` `ci` `docs` `scripts` |
 | `foray_ml` | `data` `label` `prelabel` `train` `export` `eval` `model` |
+| `foray_simulation` | `world` `robot` `bridge` `bringup` `map` `tools` `ci` `docker` |
 | `<upstream>-foray-fork` | 不提交（只 pin） |
 
 ---
@@ -349,7 +356,7 @@ CI 校验：
 
 ### 仓库
 
-**§2 的 10 个仓已全部建立**，每个仓已含：
+**§2 的 11 个仓已全部建立**，每个仓已含：
 
 `README.md` · `AGENTS.md` · `plan.md` · `tree.md` · `decision.md` · `CODEOWNERS` · `.foray-layer` · `.gitignore` · `.github/workflows/ci.yml`
 
@@ -357,14 +364,15 @@ CI 校验：
 |---|---|
 | `foray_robots` | `.gitattributes`（Git LFS，场地资产） |
 | `foray_ws` | `.repos` · `VERSIONS.md` |
+| `foray_simulation` | 整链镜像 `docker/Dockerfile`（humble + Fortress + 上游 pin）· 地图与先验点云在包内（不走 LFS） |
 
 ### 组织工程
 
 | 项 | 状态 |
 |---|---|
 | 组织默认文件（`.github`） | CONTRIBUTING 多仓协作 + CI 模板（含 ROS 2 作业，**空仓自动跳过**） |
-| team 授权 | 算法组 → 10 个自研仓 + `.github`/`foray_docs`；电控组 → `ControllerCode` + `.github`/`foray_docs` |
-| 分支保护 | 10 个自研仓的 `main` + `dev`：PR + 1 approve · 禁强推 · 禁删除 |
+| team 授权 | 算法组 → 11 个自研仓 + `.github`/`foray_docs`；电控组 → `ControllerCode` + `.github`/`foray_docs` |
+| 分支保护 | 11 个自研仓的 `main` + `dev`：PR + 1 approve · 禁强推 · 禁删除。⚠️ `foray_simulation` 的 `main` 实测仍未受保护（`gh api .../branches/main/protection` → 404），建仓时漏配，待补 |
 | 上游 fork 仓 | 轻量保护（仅禁强推/删除，**不要求 PR**——避免干扰 Sync fork） |
 | **规则真空** | `WebServer`——私有仓 + GitHub Free 不支持分支保护 |
 
