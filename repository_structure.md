@@ -248,12 +248,17 @@ CI 校验：
 
 | 对象 | 规范 |
 |---|---|
+| 仓库名 | `diesel_<domain>`（`foray_platform` → `diesel_platform`） |
+| ROS 包名 | `diesel_<domain>_<module>`（`foray_localization_map` → `diesel_localization_map`） |
 | C++ namespace | `diesel::<domain>::<module>`（如 `diesel::localization::map`、`diesel::platform::hal`） |
 | include 根 | `include/diesel/<domain>/[<module>/]`，写 `#include "diesel/localization/geometry.hpp"` |
 | ROS 节点名 | `diesel_<module>` |
-| **不变** | ROS 包名 `foray_*` · 话题 `/<module>/<entity>` · tf frame `map`/`odom`/`base_link` |
+| **不变** | 话题 `/<module>/<entity>` · tf frame `map`/`odom`/`base_link` |
+
+> `foray` 只作为**战队品牌**保留：组织名 `ZQU-Foray`，以及非上位机软件栈的仓（`foray_docs` / `foray_ml` / `foray_robots` / `foray_ws`）。
 
 映射表、不变量理由与各仓迁移状态见 [`naming.md`](naming.md) §2–§6；仓根 `.diesel-naming` 声明 `mode: enforced | migrating | na` 控制 CI 严格程度。
+本文其他章节仍用改名前的现状仓名（`foray_*`），新旧对照见 [`naming.md`](naming.md) §4.4。
 
 **本项目尤其要执行的两条**
 - **公共 API 必须有 Docstring / Doxygen**——ROS 2 话题/服务/参数都算公共 API
@@ -375,7 +380,7 @@ CI 校验：
 | 组织默认文件（`.github`） | CONTRIBUTING 多仓协作 + CI 模板（含 ROS 2 作业，**空仓自动跳过**） |
 | team 授权 | 算法组 → 10 个自研仓 + `.github`/`foray_docs`；电控组 → `ControllerCode` + `.github`/`foray_docs` |
 | 分支保护 | 10 个自研仓的 `main` + `dev`：PR + 1 approve · 禁强推 · 禁删除 |
-| 命名与风格（2026-11-03） | 上位机系统定名 **Diesel**（Discussion #6 投票通过）；规范见 [`naming.md`](naming.md)；canonical 风格配置在 `.github/config/`；CI 新增 `namespace-guard` / `style-config` 两个作业，按仓根 `.diesel-naming` 的 `mode` 渐进启用。**各仓改名由各负责人跟进**（`foray_platform` / `foray_localization` 迁移中，其余空仓 `na`） |
+| 命名与风格（2026-11-03） | 上位机系统定名 **Diesel**（Discussion #6 投票通过）；规范见 [`naming.md`](naming.md)；canonical 风格配置在 `.github/config/`；CI 新增 `namespace-guard` / `style-config` 两个作业，按仓根 `.diesel-naming` 的 `mode` 渐进启用。**改名范围**：8 个上位机软件仓（`diesel_platform` / `diesel_localization` / `diesel_interfaces` / `diesel_simulation` / `diesel_navigation` / `diesel_vision` / `diesel_auto_aim` / `diesel_decision`）连仓名、ROS 包名、namespace、include 根、节点名一起改；`foray_docs` / `foray_ml` / `foray_robots` / `foray_ws` 保留 `foray` 品牌。**执行顺序**：文档先落地（PR #3 / #8），代码仓等 open PR 合完再由各负责人按 `naming.md` §6.3 整仓迁移 |
 | 上游 fork 仓 | 轻量保护（仅禁强推/删除，**不要求 PR**——避免干扰 Sync fork） |
 | **规则真空** | `WebServer`——私有仓 + GitHub Free 不支持分支保护 |
 
