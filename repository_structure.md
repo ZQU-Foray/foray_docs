@@ -231,19 +231,34 @@ CI 校验：
 
 > 这是「功能解耦」从文档变成事实的唯一手段。
 
-### 6.6 代码风格
+### 6.6 代码风格与命名
 
-| 项 | 要求 |
+> 完整规范见 [`naming.md`](naming.md)——**代码风格配置与命名空间的唯一权威**。
+> 本节只保留仓库视角的摘要，避免两份规范各自漂移；冲突时以 `naming.md` 为准。
+
+| 项 | 要求 | 落地 |
+|---|---|---|
+| 缩进 / 换行 / 编码 | **4 空格** · **LF** · UTF-8 · 文件末尾一个空行 | [`config/.editorconfig`](https://github.com/ZQU-Foray/.github/blob/main/config/.editorconfig) |
+| C/C++ | `clang-format` | [`config/.clang-format`](https://github.com/ZQU-Foray/.github/blob/main/config/.clang-format) canonical，各仓复制到仓根 |
+| Python | `ruff` + `black` | [`config/pyproject.toml`](https://github.com/ZQU-Foray/.github/blob/main/config/pyproject.toml) canonical，各仓复制到仓根 |
+| YAML/JSON | `prettier`（默认配置） | 无需仓内文件 |
+| 标识符命名 | Python / C++ 的 `snake_case` / `PascalCase` / `UPPER_SNAKE_CASE` 规则不变 | [`naming.md`](naming.md) §5.2 |
+
+**C++ 命名空间与 include 根**（2026-11-03 起）
+
+| 对象 | 规范 |
 |---|---|
-| 缩进 | **4 空格** |
-| 换行符 | **LF** |
-| 文件末尾 | 保留一个空行 |
-| 编码 | UTF-8 |
-| Python | `ruff` + `black`（`pyproject.toml`） |
-| C/C++ | `clang-format`（`.clang-format`） |
-| YAML/JSON | `prettier` |
-| Python 命名 | 变量/函数 `snake_case` · 类 `PascalCase` · 常量 `UPPER_SNAKE_CASE` · 私有 `_` 前缀 |
-| C/C++ 命名 | 变量/函数 `snake_case` · 结构体/类 `PascalCase` · 宏/枚举 `UPPER_SNAKE_CASE` |
+| 仓库名 | `diesel_<domain>`（`foray_platform` → `diesel_platform`） |
+| ROS 包名 | `diesel_<domain>_<module>`（`foray_localization_map` → `diesel_localization_map`） |
+| C++ namespace | `diesel::<domain>::<module>`（如 `diesel::localization::map`、`diesel::platform::hal`） |
+| include 根 | `include/diesel/<domain>/[<module>/]`，写 `#include "diesel/localization/geometry.hpp"` |
+| ROS 节点名 | `diesel_<module>` |
+| **不变** | 话题 `/<module>/<entity>` · tf frame `map`/`odom`/`base_link` |
+
+> `foray` 只作为**战队品牌**保留：组织名 `ZQU-Foray`，以及非上位机软件栈的仓（`foray_docs` / `foray_ml` / `foray_robots` / `foray_ws`）。
+
+映射表、不变量理由与各仓迁移状态见 [`naming.md`](naming.md) §2–§6；仓根 `.diesel-naming` 声明 `mode: enforced | migrating | na` 控制 CI 严格程度。
+本文其他章节仍用改名前的现状仓名（`foray_*`），新旧对照见 [`naming.md`](naming.md) §4.4。
 
 **本项目尤其要执行的两条**
 - **公共 API 必须有 Docstring / Doxygen**——ROS 2 话题/服务/参数都算公共 API
@@ -365,6 +380,7 @@ CI 校验：
 | 组织默认文件（`.github`） | CONTRIBUTING 多仓协作 + CI 模板（含 ROS 2 作业，**空仓自动跳过**） |
 | team 授权 | 算法组 → 10 个自研仓 + `.github`/`foray_docs`；电控组 → `ControllerCode` + `.github`/`foray_docs` |
 | 分支保护 | 10 个自研仓的 `main` + `dev`：PR + 1 approve · 禁强推 · 禁删除 |
+| 命名与风格（2026-11-03） | 上位机系统定名 **Diesel**（Discussion #6 投票通过）；规范见 [`naming.md`](naming.md)；canonical 风格配置在 `.github/config/`；CI 新增 `namespace-guard` / `style-config` 两个作业，按仓根 `.diesel-naming` 的 `mode` 渐进启用。**改名范围**：8 个上位机软件仓（`diesel_platform` / `diesel_localization` / `diesel_interfaces` / `diesel_simulation` / `diesel_navigation` / `diesel_vision` / `diesel_auto_aim` / `diesel_decision`）连仓名、ROS 包名、namespace、include 根、节点名一起改；`foray_docs` / `foray_ml` / `foray_robots` / `foray_ws` 保留 `foray` 品牌。**执行顺序**：文档先落地（PR #3 / #8），代码仓等 open PR 合完再由各负责人按 `naming.md` §6.3 整仓迁移 |
 | 上游 fork 仓 | 轻量保护（仅禁强推/删除，**不要求 PR**——避免干扰 Sync fork） |
 | **规则真空** | `WebServer`——私有仓 + GitHub Free 不支持分支保护 |
 
