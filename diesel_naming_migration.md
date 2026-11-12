@@ -193,6 +193,13 @@ tf2 的帧名是全局唯一的树状标识，加前缀会破坏 `tf2_echo`、na
 | `diesel_ws`（原 `foray_ws`） | `.diesel-layer`、`DIESEL_*` 环境变量、`/opt/diesel`、脚本与文档全量 | `scripts/check_repos_drift.sh` →「11 条 pin 无 commit 漂移」 |
 | `diesel_robots`（原 `foray_robots`） | `.diesel-layer`、README/tree 引用 | 四道门禁全绿 |
 
+### P1 规范（部分完成）
+
+- `repository_structure.md` 已按目标态改写：§2 起仓名前缀为 `diesel_*`，并加迁移说明
+  （哪些名字保留、P4 前远端仍是旧名、GitHub 保留重定向）；§0 拓扑图同步改名。
+- 仍待 P4：`foray_docs/README.md` 的 9 条仓链接、`.github/profile/README.md` 的上位机表格
+  —— 链接指向真实 URL，提前改会在改名完成前 404。
+
 ### P3 批量（11 份 PR 已开、CI 全绿，等待 review 后合入）
 
 | 仓（新名） | PR | 备注 |

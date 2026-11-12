@@ -9,32 +9,32 @@
 
 ```
                     ┌──────────────────────────────────────────────┐
-                    │  foray_ws  （元仓 · 零业务代码）              │
-                    │  .repos 锁定 · 集成 CI · 一键拉取/构建/启动   │
-                    │  整机 tag = 可复现的「那一台能跑的车」        │
-                    └───────────────────┬──────────────────────────┘
+                    │  diesel_ws  （元仓 · 零业务代码）              │
+                    │  .repos 锁定 · 集成 CI · 一键拉取/构建/启动    │
+                    │  整机 tag = 可复现的「那一台能跑的车」         │
+                    └───────────────────┬────────────────────────────┘
                                         │ 装配引用（pin commit，不用分支）
      ┌──────────────┬───────────────────┼───────────────────┬──────────────┐
      ▼              ▼                   ▼                   ▼              ▼
- foray_robots  foray_decision    foray_auto_aim     foray_navigation   (第三方 pin)
+ diesel_robots  diesel_decision    diesel_auto_aim     diesel_navigation   (第三方 pin)
  R 装配根        L5 决策三层        L4 自瞄             L4 导航          point_lio 等
  + 地图资产      + L2 横向协同      (哨兵/步兵/英雄共用)
      │              │                   │                   │
      └──────┬───────┴─────────┬─────────┴─────────┬─────────┘
             ▼                 ▼                   ▼
-      foray_vision    foray_localization        ...
+      diesel_vision    diesel_localization        ...
       L3 目标感知      L3 定位 + 地图管理
       + 态势融合       + 配准残差
             │                 │
             └────────┬────────┘
                      ▼
-             foray_platform        L1 平台基础 + L2 下行 HAL
+             diesel_platform        L1 平台基础 + L2 下行 HAL
                      │
                      ▼
-             foray_interfaces      X2 契约：被所有仓依赖，不依赖任何仓
+             diesel_interfaces      X2 契约：被所有仓依赖，不依赖任何仓
 ```
 
-**依赖方向严格自上而下。** `foray_interfaces` 为最底层，零自研依赖。
+**依赖方向严格自上而下。** `diesel_interfaces` 为最底层，零自研依赖。
 
 ---
 
@@ -64,36 +64,42 @@
 
 一次切 14 个仓会杀死推进力。先立骨架，成熟后再拆。
 
+> **命名（2026-11-12 起）**：上位机软件系统代号为 Diesel，仓名前缀统一 `diesel_*`；
+> 战队名、组织名 `ZQU-Foray`、fork 后缀 `-foray-fork`、文档仓 `foray_docs`、
+> 下位机两仓 `foray_mcu`/`foray_mcu_controller` 与门户仓 `foray_web` 保持原名。
+> 迁移分批进行（`diesel_naming_migration.md`）：本文按目标态书写，远端仓库改名完成前
+> 地址仍是 `foray_*`，GitHub 会保留重定向。
+
 | # | 仓库 | 层/面 | 内容 | Owner | 变更率 |
 |---|---|---|---|---|---|
-| 1 | `foray_interfaces` | **X2 契约** | 全部 msg/srv/action：机内接口 + 机间态势协议 + 裁判系统消息 | 架构 | 极低 |
-| 2 | `foray_platform` | **L1 + L2-HAL** | 时间时钟 · 数学/滤波 · 参数系统 · 日志录制 · 错误码 + 下行 HAL（底盘/云台/发射/串口/CAN/传感器封装） | 平台 | 低 |
-| 3 | `foray_localization` | **L3** | 定位服务（内置地图 + 激光配准）· 地图管理 · 配准残差动态物体检测 | 导航 | 高 |
-| 4 | `foray_vision` | **L3** | 目标感知（装甲板检测/跟踪）· 态势融合 · WorldSnapshot 生成 | 视觉 | 高 |
-| 5 | `foray_auto_aim` | **L4** | 自瞄（哨兵/步兵/英雄共用）· 多源目标注入 | 视觉 | 高 |
-| 6 | `foray_navigation` | **L4** | 静态地图规划 · 动态障碍规避 · 全向控制器 | 导航 | 高 |
-| 7 | `foray_decision` | **L5 + L2横向 + X5** | 战术层(规则/RL) · 技能层 · 安全门 · 机间协同 · 对局仿真（临时） | 决策 | 高 |
-| 8 | `foray_robots` | **R + 地图资产** | 兵种装配根（`sentry_bringup` / `infantry_bringup`）· 参数 · 场地资产（LFS） | 集成 | 中 |
-| 9 | `foray_ws` | **元仓** | `.repos` · 顶层文档 · 集成 CI · 一键脚本。零业务代码 | 架构 | 极低 |
-| 10 | `foray_ml` | **T（离线工具层）** | 训练/数据/导出产线：抽帧 · 标注管理 · 小模型预标注 · 训练 · ONNX 导出 · 模型契约（原个人仓 `ctts` 迁入） | 视觉 | 中 |
+| 1 | `diesel_interfaces` | **X2 契约** | 全部 msg/srv/action：机内接口 + 机间态势协议 + 裁判系统消息 | 架构 | 极低 |
+| 2 | `diesel_platform` | **L1 + L2-HAL** | 时间时钟 · 数学/滤波 · 参数系统 · 日志录制 · 错误码 + 下行 HAL（底盘/云台/发射/串口/CAN/传感器封装） | 平台 | 低 |
+| 3 | `diesel_localization` | **L3** | 定位服务（内置地图 + 激光配准）· 地图管理 · 配准残差动态物体检测 | 导航 | 高 |
+| 4 | `diesel_vision` | **L3** | 目标感知（装甲板检测/跟踪）· 态势融合 · WorldSnapshot 生成 | 视觉 | 高 |
+| 5 | `diesel_auto_aim` | **L4** | 自瞄（哨兵/步兵/英雄共用）· 多源目标注入 | 视觉 | 高 |
+| 6 | `diesel_navigation` | **L4** | 静态地图规划 · 动态障碍规避 · 全向控制器 | 导航 | 高 |
+| 7 | `diesel_decision` | **L5 + L2横向 + X5** | 战术层(规则/RL) · 技能层 · 安全门 · 机间协同 · 对局仿真（临时） | 决策 | 高 |
+| 8 | `diesel_robots` | **R + 地图资产** | 兵种装配根（`sentry_bringup` / `infantry_bringup`）· 参数 · 场地资产（LFS） | 集成 | 中 |
+| 9 | `diesel_ws` | **元仓** | `.repos` · 顶层文档 · 集成 CI · 一键脚本。零业务代码 | 架构 | 极低 |
+| 10 | `diesel_ml` | **T（离线工具层）** | 训练/数据/导出产线：抽帧 · 标注管理 · 小模型预标注 · 训练 · ONNX 导出 · 模型契约（原个人仓 `ctts` 迁入） | 视觉 | 中 |
 
-> 2026-10-23 新增 `foray_ml`：由个人仓 `ctts`（CNN Train Tools Set）迁入，保留原提交历史；
-> 职责是模型产线（数据 → 标注 → 预标注 → 训练 → 导出 → 契约），实时推理仍在 `foray_vision`。
+> 2026-10-23 新增 `diesel_ml`：由个人仓 `ctts`（CNN Train Tools Set）迁入，保留原提交历史；
+> 职责是模型产线（数据 → 标注 → 预标注 → 训练 → 导出 → 契约），实时推理仍在 `diesel_vision`。
 > 因离线工具不属于 X2/L1–L5，其 `.foray-layer` 声明为 `T`；成熟期各仓编号相应顺延。
 
 ### 2.1 三处取舍
 
 | 取舍 | 理由 |
 |---|---|
-| **L1 与 L2-HAL 合并为 `foray_platform`** | 都是「被所有人依赖的底层」、变更率都低、owner 同属平台组。符合 C2/C3 |
-| **地图资产先放 `foray_robots`（Git LFS）** | 地图随赛季变且是大文件（PCD 可达数十 MB）。起步期放装配根 + LFS 足够 |
-| **`foray_decision` 初期临时容纳对局仿真** | 对局仿真是离线工具、变更率高，长期应独立；起步期同一 owner 内，成熟后拆出 |
+| **L1 与 L2-HAL 合并为 `diesel_platform`** | 都是「被所有人依赖的底层」、变更率都低、owner 同属平台组。符合 C2/C3 |
+| **地图资产先放 `diesel_robots`（Git LFS）** | 地图随赛季变且是大文件（PCD 可达数十 MB）。起步期放装配根 + LFS 足够 |
+| **`diesel_decision` 初期临时容纳对局仿真** | 对局仿真是离线工具、变更率高，长期应独立；起步期同一 owner 内，成熟后拆出 |
 
 ### 2.2 命名修正（已执行）
 
-原仓名 `foray_sentry_nav` 的语义是「**兵种_功能**」，隐含「哨兵专用」——而**导航恰恰要复用给步兵**，与复用目标直接冲突。
+原仓名 `diesel_sentry_nav` 的语义是「**兵种_功能**」，隐含「哨兵专用」——而**导航恰恰要复用给步兵**，与复用目标直接冲突。
 
-> **按领域命名为 `foray_navigation`**（已改名），兵种差异移到 `foray_robots/sentry_bringup`。
+> **按领域命名为 `diesel_navigation`**（已改名），兵种差异移到 `diesel_robots/sentry_bringup`。
 > 判据 C5：复用单元不得被兵种细节污染。
 
 ---
@@ -102,11 +108,11 @@
 
 | # | 新增仓 | 从哪拆出 | 触发条件 |
 |---|---|---|---|
-| 11 | `foray_field` | `foray_robots` 的场地资产 | 地图资产体积/版本频率成为负担 |
-| 12 | `foray_comms` | `foray_decision` 的机间协同 | 机间协议迭代频繁，或需开放给其他队 |
-| 13 | `foray_battle_sim` | `foray_decision` 的对局仿真 | 红队 RL 正式立项 |
-| 14 | `foray_calibration` | `foray_platform` / 各仓零散标定脚本 | 标定需要现场独立运行 |
-| 15 | `foray_debug` | 各仓的调试装配根 | 调试根数量膨胀 |
+| 11 | `diesel_field` | `diesel_robots` 的场地资产 | 地图资产体积/版本频率成为负担 |
+| 12 | `diesel_comms` | `diesel_decision` 的机间协同 | 机间协议迭代频繁，或需开放给其他队 |
+| 13 | `diesel_battle_sim` | `diesel_decision` 的对局仿真 | 红队 RL 正式立项 |
+| 14 | `diesel_calibration` | `diesel_platform` / 各仓零散标定脚本 | 标定需要现场独立运行 |
+| 15 | `diesel_debug` | 各仓的调试装配根 | 调试根数量膨胀 |
 
 > **拆仓是「因为痛了才拆」，不是「因为整齐才拆」。** 每个新仓必须能回答「不拆会怎样」。
 
@@ -198,8 +204,8 @@ main          ← 稳定版本，经过测试与 Review
 |---|---|---|
 | 所有仓 | ≥1 人 Review | — |
 | 视觉 / 电控方向 | 建议**组长** Review | — |
-| `foray_interfaces` | ≥1 人 | **≥2 人 + 兼容性影响评估** |
-| `foray_ws` 的 `.repos` 变更 | ≥1 人 | **必须说明换版本理由** |
+| `diesel_interfaces` | ≥1 人 | **≥2 人 + 兼容性影响评估** |
+| `diesel_ws` 的 `.repos` 变更 | ≥1 人 | **必须说明换版本理由** |
 
 > 追加理由：接口仓与元仓的改动**影响面跨仓**，通用规范的「≥1 人」是为单仓开发设计的。
 
@@ -211,8 +217,8 @@ main          ← 稳定版本，经过测试与 Review
 |---|---|
 | 所有仓 | 复制组织模板 → `.github/workflows/ci.yml` |
 | 所有 ROS 2 仓 | `colcon build` / `colcon test` |
-| `foray_interfaces` | + 变更影响面检查（哪些仓依赖被改动的消息） |
-| `foray_ws` | **集成 CI**：按 `.repos` 拉全量 → 全量 build → 集成测试 |
+| `diesel_interfaces` | + 变更影响面检查（哪些仓依赖被改动的消息） |
+| `diesel_ws` | **集成 CI**：按 `.repos` 拉全量 → 全量 build → 集成测试 |
 
 ### 6.5 依赖方向校验
 
@@ -226,8 +232,8 @@ depends_on_layers: [L1, L2]
 
 CI 校验：
 - `L(n)` **不得**依赖 `L(>n)`
-- **不得依赖装配根仓**（`foray_robots`）
-- `foray_interfaces` 不得依赖任何自研仓
+- **不得依赖装配根仓**（`diesel_robots`）
+- `diesel_interfaces` 不得依赖任何自研仓
 
 > 这是「功能解耦」从文档变成事实的唯一手段。
 
@@ -254,16 +260,16 @@ CI 校验：
 
 | 仓 | scope |
 |---|---|
-| `foray_interfaces` | `msg` `srv` `action` `referee` `comms` `map` |
-| `foray_platform` | `time` `math` `param` `log` `hal` `chassis` `gimbal` `shooter` `serial` `can` |
-| `foray_localization` | `map` `relocalize` `icp` `residual` `tf` |
-| `foray_vision` | `detector` `classifier` `preprocess` `tracker` `fusion` `snapshot` |
-| `foray_auto_aim` | `detector` `tracker` `solver` `aimer` `shooter` `target` |
-| `foray_navigation` | `planner` `controller` `costmap` `recovery` |
-| `foray_decision` | `tactic` `skill` `safety` `gate` `comms` `rl` `sim` |
-| `foray_robots` | `sentry` `infantry` `params` `launch` `field` |
-| `foray_ws` | `deps` `ci` `docs` `scripts` |
-| `foray_ml` | `data` `label` `prelabel` `train` `export` `eval` `model` |
+| `diesel_interfaces` | `msg` `srv` `action` `referee` `comms` `map` |
+| `diesel_platform` | `time` `math` `param` `log` `hal` `chassis` `gimbal` `shooter` `serial` `can` |
+| `diesel_localization` | `map` `relocalize` `icp` `residual` `tf` |
+| `diesel_vision` | `detector` `classifier` `preprocess` `tracker` `fusion` `snapshot` |
+| `diesel_auto_aim` | `detector` `tracker` `solver` `aimer` `shooter` `target` |
+| `diesel_navigation` | `planner` `controller` `costmap` `recovery` |
+| `diesel_decision` | `tactic` `skill` `safety` `gate` `comms` `rl` `sim` |
+| `diesel_robots` | `sentry` `infantry` `params` `launch` `field` |
+| `diesel_ws` | `deps` `ci` `docs` `scripts` |
+| `diesel_ml` | `data` `label` `prelabel` `train` `export` `eval` `model` |
 | `<upstream>-foray-fork` | 不提交（只 pin） |
 
 ---
@@ -282,7 +288,7 @@ CI 校验：
 | 接口说明 | 本仓对外暴露的话题 / 服务 / 参数 |
 | 上下游关系 | 上游是谁、下游是谁 |
 
-> 接口仓 `foray_interfaces` 的 `README.md` 尤其关键——**必须写清字段语义 / 单位 / 坐标系 / 版本兼容规则**。
+> 接口仓 `diesel_interfaces` 的 `README.md` 尤其关键——**必须写清字段语义 / 单位 / 坐标系 / 版本兼容规则**。
 
 ### 7.2 五件套
 
@@ -303,7 +309,7 @@ CI 校验：
 
 > ⚠️ 被引用的 team **必须先有该仓的 Write 权限**，否则静默失效。官方明确：即使 team 成员个人已通过组织成员身份或其他 team 获得写权限，**team 本身仍须有该仓的 Write**。
 
-### 7.4 元仓 `foray_ws` 额外需要
+### 7.4 元仓 `diesel_ws` 额外需要
 
 - `.repos`（依赖清单，pin commit）
 - 顶层 `README.md`：一站式上手指南（拉取 → 构建 → 启动）
@@ -317,11 +323,11 @@ CI 校验：
 
 | 步 | 动作 | 产出 |
 |---|---|---|
-| **M1** | 建 `foray_interfaces`，写入最小集：裁判系统消息 + 机间态势协议 | 契约先立 |
-| **M2** | 建 `foray_ws`，用 `.repos` 把上游包 pin 住（此时全是第三方） | 可复现的基线 |
+| **M1** | 建 `diesel_interfaces`，写入最小集：裁判系统消息 + 机间态势协议 | 契约先立 |
+| **M2** | 建 `diesel_ws`，用 `.repos` 把上游包 pin 住（此时全是第三方） | 可复现的基线 |
 | **M3** | 把当前 fork 也作为元仓里的一个 pin 项 | 基线含现状 |
 | **M4** | 按依赖顺序逐个替换为自研仓：`platform` → `localization` → `navigation` → `vision` → `auto_aim` → `decision` | 每替换一个，元仓里摘掉对应上游项 |
-| **M5** | 建 `foray_robots`，兵种装配根成型 | 兵种复用落地 |
+| **M5** | 建 `diesel_robots`，兵种装配根成型 | 兵种复用落地 |
 | **M6** | 打第一个整机 tag | 可复现的一台车 |
 
 **每一步可独立验证**：替换后跑通仿真 = 该步成功；不通过就回退该步，不影响其他步。
@@ -355,8 +361,8 @@ CI 校验：
 
 | 仓 | 附加 |
 |---|---|
-| `foray_robots` | `.gitattributes`（Git LFS，场地资产） |
-| `foray_ws` | `.repos` · `VERSIONS.md` |
+| `diesel_robots` | `.gitattributes`（Git LFS，场地资产） |
+| `diesel_ws` | `.repos` · `VERSIONS.md` |
 
 ### 组织工程
 
@@ -373,7 +379,7 @@ CI 校验：
 
 ### 尚未开始
 
-- **M1**：`foray_interfaces` 最小契约集（裁判系统消息 + 机间态势协议）
+- **M1**：`diesel_interfaces` 最小契约集（裁判系统消息 + 机间态势协议）
 - **三份优先冻结契约**：世界模型接口 · 决策产物接口 · 机间态势协议
 - **区域划分设计准则**：粒度档数 · 边界 · 与导航 2D 栅格的对应
-- `foray_navigation` 的 `dev-rz` 遗留分支退役
+- `diesel_navigation` 的 `dev-rz` 遗留分支退役
