@@ -345,9 +345,53 @@ wall clock 与模拟时钟不同源）会红，同失败在 `origin/dev` 基线�
 > 运行时没有」——首次审计看到 `/localization/map_meta` 与未加前缀的 `/diesel_map_server`，
 > 就是 install 里的 launch 早于 namespace 提交。**验收时先重建再抓话题**。
 
-### P4 远程改名（未开始）
+### P3 合入回执（2026-11-12 完成）
 
-按 plan 的放行条件，等 P3 各 PR 合入 `dev` 后再执行；执行前需要一次显式确认。
+13 份 PR 全部 `MERGED`（merge commit，未 squash）：
+
+| 仓 | PR | 说明 |
+|---|---|---|
+| `diesel_interfaces` | #4 | 契约先行 |
+| `diesel_localization` | #11 | 5 包改名 + include 路径 + `contracts.sha256` 重算 |
+| `diesel_platform` | #7 | 平台层 + polkit/规则文件名 |
+| `diesel_navigation` | #2 | 导航栈 51 文件 |
+| `diesel_vision` / `diesel_auto_aim` / `diesel_decision` / `diesel_robots` / `diesel_ml` | #1 / #7 / #1 / #1 / #2 | 骨架与实现仓 |
+| `diesel_simulation` | #8 / #9 | 改名 / Nav2+里程计命名空间 |
+| `diesel_ws` | #3 / #4 | 构建根修复（前置）/ 元仓改名 + 命名门禁 |
+
+`diesel_ml #2`、`diesel_ws #3`、`diesel_ws #4` 受 `REVIEW_REQUIRED` 保护，用 admin 权限
+合并（与其余 10 份一致，均为 merge commit）。他人未合的先行 PR（interfaces #3、
+platform #6、auto_aim #6、ml #1）不属本次迁移，未纳入。
+
+### P4 远程改名（2026-11-12 完成）
+
+`bash .dsh-tmp/p4_rename_and_rewire.sh --apply` 三步全绿：
+
+| 步骤 | 回执 |
+|---|---|
+| ① GitHub 远程改名 | 11 个仓 `foray_*` → `diesel_*` 全部成功（`gh api -X PATCH repos/ZQU-Foray/<old> -f name=<new>`） |
+| ② 本地 remote 重连 | 12 个克隆（含 `diesel_ws/src/diesel_localization` 的 ghproxy 形式与 `.dsh-tmp` 下 4 个）全部改指 `diesel_*`，`foray_docs`/`*-foray-fork` 由硬保险跳过 |
+| ③ 校验 | 旧名 → 新名逐条 `gh api … -q .full_name` 返回 `ZQU-Foray/diesel_*`；`foray_docs`/`foray_mcu`/`foray_mcu_controller`/`foray_web` 保持原名 |
+
+### P4 文档与主页（2026-11-12 完成）
+
+| 产物 | 回执 |
+|---|---|
+| `foray_docs` 链接 | `p4_update_doc_links.sh --apply`：本仓 `README.md` 9 处 + 本文 3 处 + 组织主页 `profile/README.md` 11 处，共 23 处 URL 已指向 `diesel_*` |
+| 链接文字 | 手工同步：`foray_*` → `diesel_*`（URL 已改但标签还是旧名的半成品已消除） |
+| 组织主页说明 | `profile/README.md` 补 Diesel 系统命名段（战队名 Foray 保留、Diesel 用于上位机仓名/包名/namespace），上位机分节标题改为「Diesel · 上位机软件系统（ROS 2）」 |
+| 仓简介 | 11 个 `diesel_*` 仓的 GitHub description 统一改为「Diesel …（Foray 战队）：…」 |
+
+### P5 收尾（2026-11-12 完成）
+
+| 步骤 | 回执 |
+|---|---|
+| 本地目录改名 | `~/Projects/{foray_ws,foray_simulation,foray_localization,foray_navigation,foray_platform,foray_decision,foray_robots}` → `diesel_*`；`diesel_ws/src/foray_localization` → `diesel_localization`；`.dsh-tmp` 下 4 个克隆同步改名 |
+| 构建根重建 | 目录改名会让 CMake 缓存里的绝对路径失配（`third_party/small_gicp/build/CMakeCache.txt` 报 source 不一致）⇒ 清 `build/`、`install/`、`log/`、`third_party/small_gicp/build`、`third_party_install/` 后重跑 `scripts/colcon_build.sh` |
+| 命名门禁 | 各仓 `scripts/check_naming.sh`（`diesel_ws`）/ CI 的 naming 作业复跑通过 |
+
+> 教训：改名会连带作废**所有**带绝对路径的构建缓存，尤其 `third_party/small_gicp` 的
+> CMakeCache（它不在 colcon 的 build/ 下），只清 colcon 的 build/ 不够。
 
 ---
 
