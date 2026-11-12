@@ -265,27 +265,46 @@ create/delete 逐对核对均为同一文件的迁移（如 `foray_*Config.cmake
 `60-foray-netconfig.rules`→`60-diesel-netconfig.rules`），无内容丢失；
 各包 `package.xml` 的 `<name>` 均为 `diesel_*` 且与包目录同名。
 
-### namespace 覆盖实测（2026-11-12，`navigation_sim.launch.py headless:=true`，ROS_DOMAIN_ID=78）
+### namespace 覆盖实测（2026-11-12，`navigation_sim.launch.py headless:=true`）
 
 | 类别 | 实测结果 |
 |---|---|
 | 定位自身输出 | `/diesel/sentry/localization/{state,map_meta,dynamic_obstacles}`（节点 `diesel.sentry.diesel_localization`、`diesel.sentry.diesel_map_server`） |
-| 上游输入（**故意保持绝对名**） | `/livox/lidar`、`/livox/imu`、`/aft_mapped_to_init`、`/localization/external_pose` —— 由参数指定，属外部契约，不由定位侧拼前缀 |
+| Nav2 全栈 | `/diesel/sentry/{bt_navigator,controller_server,velocity_smoother,planner_server,behavior_server,waypoint_follower,smoother_server,lifecycle_manager_navigation}`；自带 `map_server` 与 `lifecycle_manager_map` 同样带前缀 |
+| 里程计桥 | `/diesel/sentry/{loam_interface,sensor_scan_generation}`；产物 `odometry`、`lidar_odometry` 也随之进命名空间，裸 `/odometry` 消失 |
 | TF 帧 | `map`/`odom`/`base_footprint`/`body` 不进 namespace（frame_id 不是话题名） |
-| 尚未纳入 namespace | Nav2 全栈（`/bt_navigator`、`/controller_server`、costmap、`/cmd_vel`…）、`point_lio` 输出、Gazebo 桥 —— 多机同场需要连桥接一起改，单独立项 |
+| 必须保持绝对名 | `/cmd_vel`（gz 桥按 model 名建 `/model/diesel_sim_robot/cmd_vel`，相对名会让车不动且不报错）；上游 `/livox/*`、`/aft_mapped_to_init`、`/cloud_registered`、`/localization/external_pose`（外部契约，由参数指定） |
+| 仍未纳入 | 上游 `point_lio` 自身输出与 Gazebo 桥 —— 属仿真侧上游包，多机同场需另立项 |
 
-> 教训：`foray_simulation` 的 install 是**拷贝**，改完 launch 不重建就会「源码有 namespace、运行时没有」。
-> 本轮就踩到这坑——首次审计看到 `/localization/map_meta` 与未加前缀的 `/diesel_map_server`，
-> 原因是 install 里的 launch 早于 namespace 提交；`colcon build --packages-select diesel_simulation_bringup`
-> 后复测，两者都归入 `/diesel/sentry/`。**验收时先重建再抓话题**。
+Nav2 命名空间化的两个坑（都踩过，已写进 `diesel_simulation` 的 decision.md D27）：
+
+1. **`nav2_bringup` 的 `namespace` 参数在非组合模式下不传播**：它只用于参数 YAML 的
+   `root_key` 与组合容器名，节点本身仍是全局名 ⇒ 参数键对不上，Nav2 静默退回默认值
+   （症状：`Couldn't load critics!`、控制频率变成 20 Hz）。必须自己用
+   `launch_ros.actions.PushRosNamespace` 包住 include。
+2. **兵种参数 YAML 顶层键是相对节点名**：节点进命名空间后键匹配不上，ROS 2 **静默丢弃
+   整份参数**（症状：启动行打的是代码默认值 `min_source_points=0`、`max_unobservable_dofs=6`）。
+   用 `nav2_common.launch.RewrittenYaml(root_key=<ns>)` 重写；`root_key` 为空串时不改写，
+   因此实车（无命名空间）行为不变。
 
 验证口径：改名后 `diesel_ws` 全量构建 38 包 0 failed；`diesel_localization` 四道仓级门禁
 （file-hygiene / doc-sync / param-contract / contract-lock）exit 0；`diesel_simulation`
-整链 `accept.py ready` → `ready=PASS last_state=OK state_reason="warmup complete"`，
-话题出现在 `/diesel/sentry/localization/{state,map_meta,dynamic_obstacles}`。
+整链 `accept.py ready` → `ready=PASS last_state=OK state_reason="warmup complete"`。
+本轮命名空间化之后，起链能到 Nav2 全栈激活、话题与节点全部带 `/diesel/sentry` 前缀，
+但定位侧另有一个**与命名无关**的未决问题（见下），因此暂未取到命名空间版整链
+`ready=PASS` 的回执。
+
+已知未决（与改名无关，属 `diesel_simulation` 挂账）：本机自编栈里配准条件数从
+M11 的 `condition≈3388 / 2 方向不可观` 劣化到 `condition≈5900–7400 / 4 方向不可观`
+（`align_source≈1223` 点），超过兵种阈值 `max_unobservable_dofs: 3` ⇒ 状态一路 LOST。
+**没有为此放宽阈值**（那是安全边界），已在 `diesel_simulation/decision.md` 记为已知未决。
 
 已知非回归：`test_localization_node` 的 `SlowAlignmentKeepsHealthOk` 在开发机（高负载、
 wall clock 与模拟时钟不同源）会红，同失败在 `origin/dev` 基线上可复现，CI 机器上为绿。
+
+> 教训：`diesel_simulation` 的 install 是**拷贝**，改完 launch 不重建就会「源码有 namespace、
+> 运行时没有」——首次审计看到 `/localization/map_meta` 与未加前缀的 `/diesel_map_server`，
+> 就是 install 里的 launch 早于 namespace 提交。**验收时先重建再抓话题**。
 
 ### P4 远程改名（未开始）
 
