@@ -239,6 +239,24 @@ bash ~/Projects/.dsh-tmp/p4_update_doc_links.sh --apply   # 改 + 提交 + 推�
    自研仓仍不入账（M4 才入）；`diesel_localization` 合入 `dev` 后再按 dev commit pin。
 4. **命名门禁复跑**：`bash scripts/check_naming.sh`，白名单外必须无 `foray` 残留。
 
+### P3 合入手册（顺序与命令已固化）
+
+```bash
+bash ~/Projects/.dsh-tmp/merge_diesel_prs.sh          # 干跑：逐份打印 state/CI 计数/结论
+bash ~/Projects/.dsh-tmp/merge_diesel_prs.sh --apply  # 逐份校验 CI 全绿后合入（merge commit）
+```
+
+顺序由脚本写死，契约先行、堆叠对按依赖：`interfaces #4` → `localization #11` / `platform #7` /
+`navigation #2` / `vision #1` / `auto_aim #7` / `decision #1` / `robots #1` / `ml #2` →
+`simulation #8` → `simulation #9` → `ws #3` → `ws #4`（共 13 份，含 ws #3 这个前置）。
+
+脚本只合本次迁移的 PR，**不碰**他人未合的先期 PR（`interfaces #3`、`platform #6`、
+`auto_aim #6`、`ml #1`）；任何一份 CI 有失败或没跑完就停下来等人看，不跳着合。
+用 merge commit 而非 squash，保留分支以免打断堆叠关系。
+
+2026-11-12 干跑回执：13 份全部 `OPEN`、`MERGEABLE`、`fail=0 / other=0`，
+pass 计数 5/10/7/4/4/4/4/4/2/8/8/4/5。
+
 ### P3 批量（11 份 PR 已开、CI 全绿，等待 review 后合入）
 
 | 仓（新名） | PR | 备注 |
