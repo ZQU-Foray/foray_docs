@@ -184,8 +184,48 @@ tf2 的帧名是全局唯一的树状标识，加前缀会破坏 `tf2_echo`、na
 
 ---
 
-## 7. 参考
+## 7. 执行进度（2026-11-12）
 
+### P2 试点（已完成，等评审）
+
+| 仓 | 改动 | 回执 |
+|---|---|---|
+| `diesel_ws`（原 `foray_ws`） | `.diesel-layer`、`DIESEL_*` 环境变量、`/opt/diesel`、脚本与文档全量 | `scripts/check_repos_drift.sh` →「11 条 pin 无 commit 漂移」 |
+| `diesel_robots`（原 `foray_robots`） | `.diesel-layer`、README/tree 引用 | 四道门禁全绿 |
+
+### P3 批量（11 份 PR 已开、CI 全绿，等待 review 后合入）
+
+| 仓（新名） | PR | 备注 |
+|---|---|---|
+| `diesel_interfaces` | #4 | 契约先行，建议第一个合 |
+| `diesel_ws` | #4 | **堆叠在 #3 `fix/m2-build-root` 之上**，先合 #3 |
+| `diesel_robots` | #1 | |
+| `diesel_localization` | #11 | 含 namespace 改造（相对话题名） |
+| `diesel_simulation` | #8 | 含 namespace 注入 `robot_namespace` |
+| `diesel_platform` | #7 | 含 polkit/NM profile 等对外标识改名 |
+| `diesel_navigation` | #2 | 含头文件目录 `include/diesel/nav/` |
+| `diesel_auto_aim` | #7 | |
+| `diesel_decision` | #1 | |
+| `diesel_vision` | #1 | |
+| `diesel_ml` | #2 | |
+
+验证口径：改名后 `diesel_ws` 全量构建 38 包 0 failed；`diesel_localization` 四道仓级门禁
+（file-hygiene / doc-sync / param-contract / contract-lock）exit 0；`diesel_simulation`
+整链 `accept.py ready` → `ready=PASS last_state=OK state_reason="warmup complete"`，
+话题出现在 `/diesel/sentry/localization/{state,map_meta,dynamic_obstacles}`。
+
+已知非回归：`test_localization_node` 的 `SlowAlignmentKeepsHealthOk` 在开发机（高负载、
+wall clock 与模拟时钟不同源）会红，同失败在 `origin/dev` 基线上可复现，CI 机器上为绿。
+
+### P4 远程改名（未开始）
+
+按 plan 的放行条件，等 P3 各 PR 合入 `dev` 后再执行；执行前需要一次显式确认。
+
+---
+
+## 8. 参考
+
+- [`diesel_naming_migration.md`](diesel_naming_migration.md) 本文 §7 执行进度
 - [`repository_structure.md`](repository_structure.md) §2 起步期 10 仓、§4.1 fork 命名、§6.6 scope 词表
 - [`algorithm_structure.md`](algorithm_structure.md) §1 分层骨架（L1–L5 / X2 / R / T）
 - [discussion #6](https://github.com/orgs/ZQU-Foray/discussions/6) 命名投票
