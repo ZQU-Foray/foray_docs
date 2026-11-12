@@ -21,6 +21,9 @@ discussion #6 投票针对的是第二种。因此本次迁移只动「上位机
 战队名下位机（`foray_mcu`、`foray_mcu_controller`）、门户（`foray_web`）、
 文档（`foray_docs`）与四个上游 fork 全部保留原名。
 
+> `foray_web` 按**文档/门户类**处理——它是战队管理门户与 STM32 调试台，
+> 不属于 ROS 2 上位机栈，与 `foray_docs` 同级，不进 Diesel 命名体系。
+
 沿用 §2.2 的判据 C5「复用单元不得被兵种细节污染」的同一逻辑：
 **命名单元不得被战队名与系统名混用污染。**
 
@@ -80,10 +83,34 @@ discussion #6 投票针对的是第二种。因此本次迁移只动「上位机
 
 `.foray-layer` → `.diesel-layer`（7 个仓根各一份）。文件内容 `layer:` 取值不变。
 
-### 1.5 ROS 运行时 namespace（待决，见 §6）
+### 1.5 ROS 运行时 namespace：`/diesel/<robot>`
 
-当前实例根为 `sentry_root` / `infantry_root`。是否统一挂到 `/diesel/<robot>` 需要与
-多机联调脚本（`accept.py`）、nav2 参数、launch 一次性协调，不并入前四批。
+上位机共用一套 ROS 图，实例按兵种区分。统一规则：
+
+| 层 | 现 | 新 |
+|---|---|---|
+| 实例根 | 扁平（全局同名话题） | `/diesel/sentry` · `/diesel/infantry` |
+| 定位状态 | `/localization/state` | `/diesel/<robot>/localization/state` |
+| 地图元信息 | `/localization/map_meta` | `/diesel/<robot>/localization/map_meta` |
+| 动态障碍 | `/localization/obstacles` | `/diesel/<robot>/localization/obstacles` |
+| 节点名 | `foray_localization` · `foray_map_server` | `diesel_localization` · `diesel_map_server` |
+
+**实现方式（关键）**：节点内话题名一律改为**相对名**（`localization/state`），
+由 launch / 兵种 profile 注入 `namespace:=/diesel/sentry`。不在 C++ 里拼绝对前缀，
+也不靠逐条 remap 写死——否则多机与单机回放要维护两套名字。
+
+**保留**：TF 帧名（`map` / `odom` / `base_footprint` / `body`）不进 namespace，
+tf2 的帧名是全局唯一的树状标识，加前缀会破坏 `tf2_echo`、nav2 与 RViz 配置。
+
+### 1.6 环境变量与实机路径
+
+| 现 | 新 |
+|---|---|
+| `FORAY_LIVOX_SDK2_PREFIX` / `FORAY_MVS_PREFIX` / `FORAY_SKIP_PACKAGES` | `DIESEL_LIVOX_SDK2_PREFIX` / `DIESEL_MVS_PREFIX` / `DIESEL_SKIP_PACKAGES` |
+| `/opt/foray/livox-sdk2` · `/opt/foray/mvs-sdk`（实机镜像路径） | `/opt/diesel/livox-sdk2` · `/opt/diesel/mvs-sdk` |
+
+实机镜像需同批改路径；`~/.cache/foray-platform-prefix/`（开发机默认安装点）一并改
+`~/.cache/diesel-platform-prefix/`。**保留**：`foray_docs` 的文档链接与战队名。
 
 ---
 
@@ -95,7 +122,7 @@ discussion #6 投票针对的是第二种。因此本次迁移只动「上位机
 |---|---|---|
 | **P0**（本次） | 本计划入库；`tree.md`/`README.md` 索引更新 | 文档可读，索引可达 |
 | **P1** | `repository_structure.md` §2/§4.1/§6.6 与 `.github/profile/README.md` 主页表格改指 `diesel_*` | 规范与主页无 `foray_` 系统残留、无坏链 |
-| **P2** 试点 | `foray_localization` 单仓全链改造（5 包 + namespace + include + `.diesel-layer`），**仓名暂不改** | `diesel_ws` 全量构建 38 包 0 failed；四道门禁全绿；`navigation_sim` + `accept.py ready` 回执 |
+| **P2** 试点 | **`diesel_ws` + `diesel_robots`** 两仓全链改造（元仓文档/脚本/`.diesel-layer`/环境变量 + 装配根骨架），仓名暂不改 | ws：构建入口仍 38 包 0 failed、`check_repos_drift.sh` exit 0；robots：四道门禁全绿 |
 | **P3** 批量 | `interfaces`（契约先行）→ `platform` → `simulation` → 其余骨架仓的包名与 `.diesel-layer` | 同上，且下游 `package.xml` 依赖同步 |
 | **P4** 远程改名 | `gh api -X PATCH /repos/ZQU-Foray/<old> -f name=<new>` ×11；`.repos` 自研仓 URL；本地 remote | 旧链接 302 到新仓；`scripts/check_repos_drift.sh` exit 0 |
 | **P5** 收尾 | 徽章、`CODEOWNERS`、文档互链全局 grep、打 `diesel-v0.1` tag | 白名单外零 `foray` 残留 |
@@ -146,13 +173,14 @@ discussion #6 投票针对的是第二种。因此本次迁移只动「上位机
 
 ## 6. 未决问题
 
-| # | 问题 | 现状倾向 |
+| # | 问题 | 结论 |
 |---|---|---|
-| 1 | `foray_web`（战队门户 + STM32 调试台）是否纳入 Diesel | **不纳入**：非 ROS 上位机栈 |
-| 2 | ROS 运行时 namespace 是否统一为 `/diesel/<robot>` | 待定：需与 `accept.py`、nav2、多机联调同批 |
+| 1 | `foray_web`（战队门户 + STM32 调试台）是否纳入 Diesel | **已决：不纳入**，归入文档/门户类，与 `foray_docs` 同级保留 |
+| 2 | ROS 运行时 namespace 是否统一为 `/diesel/<robot>` | **已决：统一**，见 §1.5（相对话题名 + launch 注入 namespace，TF 帧名不动） |
 | 3 | `foray_docs` 是否改名 `diesel_docs` | **不纳入**：战队级文档 |
 | 4 | 采用「改名」还是「新建 + archive 旧仓」 | 改名（保留 issue/PR 历史与 redirect） |
 | 5 | 旧前缀是否需要一段废弃期（双包共存） | 不需要：仓内无外部消费者 |
+| 6 | 实机镜像 `/opt/foray/*` 的切换时点 | 随 P4 改名同批，由部署侧重新出镜像 |
 
 ---
 
