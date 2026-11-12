@@ -215,18 +215,29 @@ bash ~/Projects/.dsh-tmp/p4_rename_and_rewire.sh --apply  # 真执行
 
 # 2) 校验重定向：旧 URL 应 200 且 .full_name 已是 diesel_*
 gh api repos/ZQU-Foray/foray_ws -q .full_name             # → ZQU-Foray/diesel_ws
+
+# 3) 文档链接跟着换（含 .github 组织主页与 foray_docs 索引；保留 docs/mcu/web/HelloWorld）
+bash ~/Projects/.dsh-tmp/p4_update_doc_links.sh           # 干跑：只打印将改的文件与处数
+bash ~/Projects/.dsh-tmp/p4_update_doc_links.sh --apply   # 改 + 提交 + 推送 + 逐条校验
 ```
+
+第 3 步的干跑回执（2026-11-12，改名执行前）：`foray_docs/README.md` 9 处、
+`.github/profile/README.md` 11 处、本计划文档 1 处，合计 21 处；
+`foray_docs`、`foray_mcu`、`foray_mcu_controller`、`foray_web`、`*-foray-fork` 一律不匹配
+（正则 `ZQU-Foray/foray_(?!docs|mcu|web|HelloWorld)`）。脚本末尾会逐个 `gh api` 打印
+11 个新仓与 4 个保留仓的 `.full_name`，任何一个「缺失」即中止排查。
 
 覆盖的克隆（12 个）：`foray_localization`/`navigation`/`platform`/`decision`/`robots`/
 `simulation`/`ws` 七个仓 + 构建根下的 `foray_ws/src/foray_localization` + 四个临时克隆
 （`interfaces`/`vision`/`auto_aim`/`ml`）。`foray_docs` 与 `*-foray-fork` 不动。
 
-收尾三件（P5）：
-- 本地目录名仍是 `foray_*`：改目录名不影响 `colcon_build.sh`（固定 `--base-paths src`），
-  但会打断已记录的绝对路径，建议整批一次改、改完重编一次。
-- `foray_docs/README.md` 9 条仓链接、`.github/profile/README.md` 上位机表格：改名后一次性换，
-  顺手用 `gh api repos/ZQU-Foray/<name> -q .full_name` 逐条验证 200。
-- `.repos` 里自研仓仍不入账（M4 才入），P4 不改它；等 `diesel_localization` 合入 dev 后再按 dev commit pin。
+收尾（P5，按顺序）：
+1. **文档链接**：`p4_update_doc_links.sh --apply`（上面第 3 步，脚本自带提交与校验）。
+2. **本地目录改名**：仍是 `foray_*`。改目录名不影响 `colcon_build.sh`（固定 `--base-paths src`），
+   但会打断已记录的绝对路径，建议整批一次改、改完重编一次。
+3. **`.repos` 与构建根**：`diesel_ws` 的 `.repos` URL 由本地脚本跟随仓库名变化，
+   自研仓仍不入账（M4 才入）；`diesel_localization` 合入 `dev` 后再按 dev commit pin。
+4. **命名门禁复跑**：`bash scripts/check_naming.sh`，白名单外必须无 `foray` 残留。
 
 ### P3 批量（11 份 PR 已开、CI 全绿，等待 review 后合入）
 
