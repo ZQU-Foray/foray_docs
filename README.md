@@ -12,6 +12,7 @@
 | [algorithm_structure.md](algorithm_structure.md) | **算法结构** —— 分层骨架、世界模型、决策层接口、离线开发闭环 |
 | [repository_structure.md](repository_structure.md) | **仓库结构** —— 仓拓扑、切割判据、依赖方向、版本锁定、协作规范、迁移路径 |
 | [dual_stream_disentanglement.md](dual_stream_disentanglement.md) | **双流特征解耦** —— 灯条颜色 × 图案的任务解耦、非对称双流结构、训练策略与消融方案 |
+| [diesel_naming_migration.md](diesel_naming_migration.md) | **命名迁移** —— 战队名 `Foray` 与系统名 `Diesel` 的边界、仓名 / ROS 包名 / C++ namespace 改名批次与验收 |
 
 **阅读顺序**：先 `algorithm_structure.md` 建立整体结构，再看 `repository_structure.md` 了解如何分工落地；视觉识别方向直接看 `dual_stream_disentanglement.md`。
 
