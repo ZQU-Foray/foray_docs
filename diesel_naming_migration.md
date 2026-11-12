@@ -244,6 +244,27 @@ gh api repos/ZQU-Foray/foray_ws -q .full_name             # → ZQU-Foray/diesel
 | `diesel_vision` | #1 | |
 | `diesel_ml` | #2 | |
 
+### P3 审计回执（2026-11-12，逐仓核对「只改名、不丢东西」）
+
+| 仓 | 变动文件 | 其中 rename | create/delete | 跟踪文件数（base → 分支） |
+|---|---|---|---|---|
+| `diesel_interfaces` | 12 | 1 | 0 | 20 → 20 |
+| `diesel_ws` | 17 | 1 | +1 `scripts/check_naming.sh` | 18 → 19 |
+| `diesel_robots` | 5 | 1 | 0 | 10 → 10 |
+| `diesel_localization` | 96 | 84 | 1/1（cmake 模板，内容全改故未配对） | 104 → 104 |
+| `diesel_simulation` | 101 | 90 | 0 | 107 → 107 |
+| `diesel_platform` | 208 | 170 | 10/10（polkit/src/CMake 等） | 201 → 201 |
+| `diesel_navigation` | 44 | 12 | 0 | 51 → 51 |
+| `diesel_auto_aim` | 20 | 6 | 0 | 23 → 23 |
+| `diesel_decision` | 6 | 1 | 0 | 9 → 9 |
+| `diesel_vision` | 6 | 1 | 0 | 9 → 9 |
+| `diesel_ml` | 8 | 1 | 0 | 41 → 41 |
+
+结论：11 个仓跟踪文件数全部守恒（`diesel_ws` +1 是新增的命名门禁脚本），
+create/delete 逐对核对均为同一文件的迁移（如 `foray_*Config.cmake.in`→`diesel_*Config.cmake.in`、
+`60-foray-netconfig.rules`→`60-diesel-netconfig.rules`），无内容丢失；
+各包 `package.xml` 的 `<name>` 均为 `diesel_*` 且与包目录同名。
+
 验证口径：改名后 `diesel_ws` 全量构建 38 包 0 failed；`diesel_localization` 四道仓级门禁
 （file-hygiene / doc-sync / param-contract / contract-lock）exit 0；`diesel_simulation`
 整链 `accept.py ready` → `ready=PASS last_state=OK state_reason="warmup complete"`，
