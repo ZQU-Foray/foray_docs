@@ -221,6 +221,16 @@ bash ~/Projects/.dsh-tmp/p4_update_doc_links.sh           # 干跑：只打印�
 bash ~/Projects/.dsh-tmp/p4_update_doc_links.sh --apply   # 改 + 提交 + 推送 + 逐条校验
 ```
 
+改名前的安全性核查（2026-11-12，逐仓 grep 实测，P4 不会踩雷）：
+- **无跨仓 workflow 引用**：11 仓的 `.github/workflows/*.yml` 里没有 `uses: ZQU-Foray/foray_*`
+  这类复用工作流，改名不会打断 CI。
+- **无自仓 badge**：README 里没有指向自身 `foray_*` 仓的 shields/actions 徽章
+  （仅上游 rmoss_* / small_gicp / image_common 的第三方徽章）。
+- **`.repos` 无自研仓 URL**：`diesel_ws/.repos` 里只有 `mvs-sdk` 这一个 `ZQU-Foray` 条目；
+  `foray_localization` 按 M4 计划尚未入账，改名后 P5 第 3 步再定 pin。
+- **本地绝对路径**：`~/Projects/foray_*` 目录名在 P5 第 2 步再改，脚本不依赖旧名
+  （`colcon_build.sh` 固定 `--base-paths src`）。
+
 第 3 步的干跑回执（2026-11-12，改名执行前）：`foray_docs/README.md` 9 处、
 `.github/profile/README.md` 11 处、本计划文档 1 处，合计 21 处；
 `foray_docs`、`foray_mcu`、`foray_mcu_controller`、`foray_web`、`*-foray-fork` 一律不匹配
