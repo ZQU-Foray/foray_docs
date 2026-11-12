@@ -149,10 +149,14 @@ tf2 的帧名是全局唯一的树状标识，加前缀会破坏 `tf2_echo`、na
 
 1. **构建**：`source /opt/ros/humble/setup.bash && cd ~/Projects/diesel_ws && scripts/colcon_build.sh` → `38 packages finished`，0 failed。
 2. **门禁**：`scripts/ci/check_style.py`、`check_tree_doc.py`、`check_params.py`、`check_contracts.py` 全 exit 0。
-3. **命名一致性**（建议新增 `scripts/ci/check_naming.py`）：仓内所有 `package.xml` 的 `<name>` 以 `diesel_` 开头；
-   每个仓根存在 `.diesel-layer`；C++ 源文件命名空间为 `diesel::`。
-4. **残留扫描**：`grep -rIl "foray" .` 的命中必须落在白名单——`decision.md` 历史条目、
-   `README.md` 战队名段落、`*-foray-fork` 引用、`ZQU-Foray` 组织链接。
+3. **命名一致性**：仓内所有 `package.xml` 的 `<name>` 以 `diesel_` 开头；每仓根有 `.diesel-layer`；
+   C++ 源文件命名空间为 `diesel::`。
+4. **残留扫描**：`diesel_ws/scripts/check_naming.sh`（已落地，CI `naming` 作业执行）——白名单外不得出现
+   `foray`；`grep -rIl -i foray .` 的命中只能落在白名单：`ZQU-Foray`、`foray_docs`、`*-foray-fork`、
+   战队文案/版权头（`Foray`/`FORAY`）、`foray_mcu`、`foray_web`、`foray-HelloWorld`、P4 前的
+   `foray_localization` 引用、已删除沙箱目录名 `foray_sim_ws` 的历史叙述。
+   2026-11-12 实跑：11 个上位机仓全部通过；首跑抓到 `scripts/build_livox_sdk2.sh` 的
+   `~/.cache/foray-build` 两处真残留并修掉。
 5. **链接**：`foray_docs/README.md`、`.github/profile/README.md` 中 11 个仓链接全部 200。
 
 ---
