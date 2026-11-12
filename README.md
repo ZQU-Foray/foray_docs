@@ -37,6 +37,10 @@
 [`foray_robots`](https://github.com/ZQU-Foray/foray_robots) ·
 [`foray_ws`](https://github.com/ZQU-Foray/foray_ws)
 
+> 上面的仓名仍是 `foray_*`：Diesel 迁移按 [`diesel_naming_migration.md`](diesel_naming_migration.md)
+> 分批推进，P4 会把远程仓名改成 `diesel_*`，本段链接由脚本统一替换（旧 URL 会重定向）。
+> 目标态的仓名与职责见 [`repository_structure.md`](repository_structure.md) §2。
+
 ---
 
 ## 贡献
