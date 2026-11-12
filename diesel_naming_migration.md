@@ -265,6 +265,20 @@ create/delete 逐对核对均为同一文件的迁移（如 `foray_*Config.cmake
 `60-foray-netconfig.rules`→`60-diesel-netconfig.rules`），无内容丢失；
 各包 `package.xml` 的 `<name>` 均为 `diesel_*` 且与包目录同名。
 
+### namespace 覆盖实测（2026-11-12，`navigation_sim.launch.py headless:=true`，ROS_DOMAIN_ID=78）
+
+| 类别 | 实测结果 |
+|---|---|
+| 定位自身输出 | `/diesel/sentry/localization/{state,map_meta,dynamic_obstacles}`（节点 `diesel.sentry.diesel_localization`、`diesel.sentry.diesel_map_server`） |
+| 上游输入（**故意保持绝对名**） | `/livox/lidar`、`/livox/imu`、`/aft_mapped_to_init`、`/localization/external_pose` —— 由参数指定，属外部契约，不由定位侧拼前缀 |
+| TF 帧 | `map`/`odom`/`base_footprint`/`body` 不进 namespace（frame_id 不是话题名） |
+| 尚未纳入 namespace | Nav2 全栈（`/bt_navigator`、`/controller_server`、costmap、`/cmd_vel`…）、`point_lio` 输出、Gazebo 桥 —— 多机同场需要连桥接一起改，单独立项 |
+
+> 教训：`foray_simulation` 的 install 是**拷贝**，改完 launch 不重建就会「源码有 namespace、运行时没有」。
+> 本轮就踩到这坑——首次审计看到 `/localization/map_meta` 与未加前缀的 `/diesel_map_server`，
+> 原因是 install 里的 launch 早于 namespace 提交；`colcon build --packages-select diesel_simulation_bringup`
+> 后复测，两者都归入 `/diesel/sentry/`。**验收时先重建再抓话题**。
+
 验证口径：改名后 `diesel_ws` 全量构建 38 包 0 failed；`diesel_localization` 四道仓级门禁
 （file-hygiene / doc-sync / param-contract / contract-lock）exit 0；`diesel_simulation`
 整链 `accept.py ready` → `ready=PASS last_state=OK state_reason="warmup complete"`，
