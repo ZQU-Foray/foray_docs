@@ -204,6 +204,30 @@ tf2 的帧名是全局唯一的树状标识，加前缀会破坏 `tf2_echo`、na
 - 仍待 P4：`foray_docs/README.md` 的 9 条仓链接、`.github/profile/README.md` 的上位机表格
   —— 链接指向真实 URL，提前改会在改名完成前 404。
 
+### P4 执行手册（脚本就绪，等合入后授权执行）
+
+前置：11 份 `feat/diesel-naming` PR 已合入各自 `dev`。
+
+```bash
+# 1) 11 个远程改名 + 12 个本地克隆重连（默认 dry-run，看清清单再加 --apply）
+bash ~/Projects/.dsh-tmp/p4_rename_and_rewire.sh          # 干跑
+bash ~/Projects/.dsh-tmp/p4_rename_and_rewire.sh --apply  # 真执行
+
+# 2) 校验重定向：旧 URL 应 200 且 .full_name 已是 diesel_*
+gh api repos/ZQU-Foray/foray_ws -q .full_name             # → ZQU-Foray/diesel_ws
+```
+
+覆盖的克隆（12 个）：`foray_localization`/`navigation`/`platform`/`decision`/`robots`/
+`simulation`/`ws` 七个仓 + 构建根下的 `foray_ws/src/foray_localization` + 四个临时克隆
+（`interfaces`/`vision`/`auto_aim`/`ml`）。`foray_docs` 与 `*-foray-fork` 不动。
+
+收尾三件（P5）：
+- 本地目录名仍是 `foray_*`：改目录名不影响 `colcon_build.sh`（固定 `--base-paths src`），
+  但会打断已记录的绝对路径，建议整批一次改、改完重编一次。
+- `foray_docs/README.md` 9 条仓链接、`.github/profile/README.md` 上位机表格：改名后一次性换，
+  顺手用 `gh api repos/ZQU-Foray/<name> -q .full_name` 逐条验证 200。
+- `.repos` 里自研仓仍不入账（M4 才入），P4 不改它；等 `diesel_localization` 合入 dev 后再按 dev commit pin。
+
 ### P3 批量（11 份 PR 已开、CI 全绿，等待 review 后合入）
 
 | 仓（新名） | PR | 备注 |
