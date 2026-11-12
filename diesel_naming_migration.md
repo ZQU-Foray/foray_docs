@@ -214,7 +214,7 @@ bash ~/Projects/.dsh-tmp/p4_rename_and_rewire.sh          # 干跑
 bash ~/Projects/.dsh-tmp/p4_rename_and_rewire.sh --apply  # 真执行
 
 # 2) 校验重定向：旧 URL 应 200 且 .full_name 已是 diesel_*
-gh api repos/ZQU-Foray/foray_ws -q .full_name             # → ZQU-Foray/diesel_ws
+gh api repos/ZQU-Foray/diesel_ws -q .full_name             # → ZQU-Foray/diesel_ws
 
 # 3) 文档链接跟着换（含 .github 组织主页与 foray_docs 索引；保留 docs/mcu/web/HelloWorld）
 bash ~/Projects/.dsh-tmp/p4_update_doc_links.sh           # 干跑：只打印将改的文件与处数
@@ -222,7 +222,7 @@ bash ~/Projects/.dsh-tmp/p4_update_doc_links.sh --apply   # 改 + 提交 + 推�
 ```
 
 改名前的安全性核查（2026-11-12，逐仓 grep 实测，P4 不会踩雷）：
-- **无跨仓 workflow 引用**：11 仓的 `.github/workflows/*.yml` 里没有 `uses: ZQU-Foray/foray_*`
+- **无跨仓 workflow 引用**：11 仓的 `.github/workflows/*.yml` 里没有 `uses: ZQU-Foray/diesel_*`
   这类复用工作流，改名不会打断 CI。
 - **无自仓 badge**：README 里没有指向自身 `foray_*` 仓的 shields/actions 徽章
   （仅上游 rmoss_* / small_gicp / image_common 的第三方徽章）。
@@ -234,7 +234,7 @@ bash ~/Projects/.dsh-tmp/p4_update_doc_links.sh --apply   # 改 + 提交 + 推�
 第 3 步的干跑回执（2026-11-12，改名执行前）：`foray_docs/README.md` 9 处、
 `.github/profile/README.md` 11 处、本计划文档 1 处，合计 21 处；
 `foray_docs`、`foray_mcu`、`foray_mcu_controller`、`foray_web`、`*-foray-fork` 一律不匹配
-（正则 `ZQU-Foray/foray_(?!docs|mcu|web|HelloWorld)`）。脚本末尾会逐个 `gh api` 打印
+（正则 `ZQU-Foray/diesel_(?!docs|mcu|web|HelloWorld)`）。脚本末尾会逐个 `gh api` 打印
 11 个新仓与 4 个保留仓的 `.full_name`，任何一个「缺失」即中止排查。
 
 覆盖的克隆（12 个）：`foray_localization`/`navigation`/`platform`/`decision`/`robots`/

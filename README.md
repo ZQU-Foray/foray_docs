@@ -27,15 +27,15 @@
 
 **上位机自研仓**（结构见 [`repository_structure.md`](repository_structure.md) §2）：
 
-[`foray_interfaces`](https://github.com/ZQU-Foray/foray_interfaces) ·
-[`foray_platform`](https://github.com/ZQU-Foray/foray_platform) ·
-[`foray_localization`](https://github.com/ZQU-Foray/foray_localization) ·
-[`foray_vision`](https://github.com/ZQU-Foray/foray_vision) ·
-[`foray_auto_aim`](https://github.com/ZQU-Foray/foray_auto_aim) ·
-[`foray_navigation`](https://github.com/ZQU-Foray/foray_navigation) ·
-[`foray_decision`](https://github.com/ZQU-Foray/foray_decision) ·
-[`foray_robots`](https://github.com/ZQU-Foray/foray_robots) ·
-[`foray_ws`](https://github.com/ZQU-Foray/foray_ws)
+[`foray_interfaces`](https://github.com/ZQU-Foray/diesel_interfaces) ·
+[`foray_platform`](https://github.com/ZQU-Foray/diesel_platform) ·
+[`foray_localization`](https://github.com/ZQU-Foray/diesel_localization) ·
+[`foray_vision`](https://github.com/ZQU-Foray/diesel_vision) ·
+[`foray_auto_aim`](https://github.com/ZQU-Foray/diesel_auto_aim) ·
+[`foray_navigation`](https://github.com/ZQU-Foray/diesel_navigation) ·
+[`foray_decision`](https://github.com/ZQU-Foray/diesel_decision) ·
+[`foray_robots`](https://github.com/ZQU-Foray/diesel_robots) ·
+[`foray_ws`](https://github.com/ZQU-Foray/diesel_ws)
 
 > 上面的仓名仍是 `foray_*`：Diesel 迁移按 [`diesel_naming_migration.md`](diesel_naming_migration.md)
 > 分批推进，P4 会把远程仓名改成 `diesel_*`，本段链接由脚本统一替换（旧 URL 会重定向）。
