@@ -398,6 +398,7 @@ platform #6、auto_aim #6、ml #1）不属本次迁移，未纳入。
 | 事项 | 回执 |
 |---|---|
 | 命名门禁空壳 | `diesel_ws/scripts/check_naming.sh` 第 24 行是孤立的 `X`（白名单赋值丢失）⇒ `$WHITELIST` 为空 ⇒ `grep -Ev ""` 匹配所有行 ⇒ **门禁永远 exit 0**、CI `naming` 作业一直空转。修复见 `diesel_ws` PR [#5](https://github.com/ZQU-Foray/diesel_ws/pull/5)：补全白名单、空白名单 `exit 2`、扫描时排除脚本自身、CI 加「注入探针必须失败」自检 |
+| 合入 | `diesel_ws` PR #5 → `dev`（merge `513e4b1`）、`diesel_simulation` PR #10 → `dev`（merge `95cb331`）；本地 `dev` 已 ff，`colcon test` 8/8、门禁 11 仓全绿 |
 | 门禁自检的夹具坑 | workflow 文件本身也在扫描范围内，探针里写死旧名会让「检查旧命名残留」先挂在自己的夹具上；探针旧名改为运行时拼接后 CI 5/5 绿 |
 | 门禁实跑结论 | 修好后跨 11 仓（含 `.dsh-tmp` 的 interfaces / vision / auto_aim / ml）全绿 ⇒ 改名本身确实干净，之前「无残留」的结论此前没有证据支撑 |
 | namespace 整链 | 定位侧健康（`state: OK`、`a2 max_xy_err=0.034 lost=0`）但 Nav2 卡 `inactive`：Nav2 的 tf2 监听器按相对名订阅 `tf`，进 `/diesel/sentry` 后落到 0 发布者的 `/diesel/sentry/tf`。给 nav2 的 include 挂 `SetRemap` **不生效**（remap 不随 `IncludeLaunchDescription` 传播），改由 `diesel_simulation` 的 `tf_relay` 节点中继；出站 `/tf` 必须 reliable，否则被订阅端判 incompatible QoS 静默丢包。修复见 PR [#10](https://github.com/ZQU-Foray/diesel_simulation/pull/10)，回执 `ready=PASS ready_delay_s=0.94 bt_navigator=active controller_server=active` |
