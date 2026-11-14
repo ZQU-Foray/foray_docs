@@ -38,8 +38,8 @@ discussion #6 投票针对的是第二种。因此本次迁移只动「上位机
 | 1 | `foray_interfaces` | `diesel_interfaces` | X2 契约 | 骨架 |
 | 2 | `foray_platform` | `diesel_platform` | L1 + L2-HAL | 骨架 |
 | 3 | `foray_localization` | `diesel_localization` | L3 | **已实现**（5 包 / 145 测试） |
-| 4 | `foray_vision` | `diesel_vision` | L3 | 骨架 |
-| 5 | `foray_auto_aim` | `diesel_auto_aim` | L4 | 骨架 |
+| 4 | `foray_vision` | `diesel_vision` → `diesel_vision_frontend` | L3 | 骨架 |
+| 5 | `foray_auto_aim` | `diesel_auto_aim` → `diesel_vision_backend` | L4 | 骨架 |
 | 6 | `foray_navigation` | `diesel_navigation` | L4 | 骨架 |
 | 7 | `foray_decision` | `diesel_decision` | L5 + L2 横向 + X5 | 骨架 |
 | 8 | `foray_robots` | `diesel_robots` | R + 地图资产 | 骨架 |
@@ -402,6 +402,26 @@ platform #6、auto_aim #6、ml #1）不属本次迁移，未纳入。
 | 门禁自检的夹具坑 | workflow 文件本身也在扫描范围内，探针里写死旧名会让「检查旧命名残留」先挂在自己的夹具上；探针旧名改为运行时拼接后 CI 5/5 绿 |
 | 门禁实跑结论 | 修好后跨 11 仓（含 `.dsh-tmp` 的 interfaces / vision / auto_aim / ml）全绿 ⇒ 改名本身确实干净，之前「无残留」的结论此前没有证据支撑 |
 | namespace 整链 | 定位侧健康（`state: OK`、`a2 max_xy_err=0.034 lost=0`）但 Nav2 卡 `inactive`：Nav2 的 tf2 监听器按相对名订阅 `tf`，进 `/diesel/sentry` 后落到 0 发布者的 `/diesel/sentry/tf`。给 nav2 的 include 挂 `SetRemap` **不生效**（remap 不随 `IncludeLaunchDescription` 传播），改由 `diesel_simulation` 的 `tf_relay` 节点中继；出站 `/tf` 必须 reliable，否则被订阅端判 incompatible QoS 静默丢包。修复见 PR [#10](https://github.com/ZQU-Foray/diesel_simulation/pull/10)，回执 `ready=PASS ready_delay_s=0.94 bt_navigator=active controller_server=active` |
+
+### 视觉前后端分家：二次改名（2026-11-14 已执行）
+
+原 `diesel_vision`（检测 + 融合）与原 `diesel_auto_aim`（自瞄）职责重叠，按「前端 = 检测、后端 = 融合 + 跟踪」重划：
+
+| 一次改名（P4 已完成） | 二次改名（本批） | 层 | 变化 |
+|---|---|---|---|
+| `diesel_vision` | `diesel_vision_frontend` | L3 | 检测器 / PnP 留在此处；不再生成 WorldSnapshot |
+| `diesel_auto_aim` | `diesel_vision_backend` | L4 | 承接多源融合 + WorldSnapshot；删除检测类型 |
+
+- 前置：`feat/sp-tracker-auto-aim`（ahead 4 / behind 9）先 rebase 到 `dev` 并改完 diesel 命名，再改名，避免两套重命名叠加。
+- 契约：`Observation` / `WorldSnapshot` / `GimbalCommand` 消息进 `diesel_interfaces`，消费方只依赖消息。
+- 门禁：两仓独立 `colcon build` + `colcon test`、`check_naming.sh`、`diesel_ws` `.repos`/`VERSIONS.md` 同步。
+
+执行回执（2026-11-14）：
+
+- 分支收敛先完成：PR #8（`diesel_auto_aim`，merge `96d794e`）、PR #2（`diesel_vision`，merge `55ae500`）先后合入各自 `dev`。
+- GitHub 原地改名：`diesel_auto_aim` → `diesel_vision_backend`、`diesel_vision` → `diesel_vision_frontend`；旧 URL 自动重定向已验证。
+- 包名/命名空间/`include` 路径/CI 与文档随 PR #9（merge `776b89e`）、PR #3（merge `5e65d49`）合入；本地后端 83 条、前端 16 条测试全绿，两 PR 的四项 CI 全绿。
+- `WorldSnapshot` 与融合代码尚未落地（I7），当前后端只消费 `Observation`。
 
 ---
 

@@ -16,15 +16,15 @@
                                         │ 装配引用（pin commit，不用分支）
      ┌──────────────┬───────────────────┼───────────────────┬──────────────┐
      ▼              ▼                   ▼                   ▼              ▼
- diesel_robots  diesel_decision    diesel_auto_aim     diesel_navigation   (第三方 pin)
- R 装配根        L5 决策三层        L4 自瞄             L4 导航          point_lio 等
- + 地图资产      + L2 横向协同      (哨兵/步兵/英雄共用)
+ diesel_robots  diesel_decision  diesel_vision_backend  diesel_navigation   (第三方 pin)
+ R 装配根        L5 决策三层       L4 融合+跟踪+瞄准       L4 导航          point_lio 等
+ + 地图资产      + L2 横向协同     (哨兵/步兵/英雄共用)
      │              │                   │                   │
      └──────┬───────┴─────────┬─────────┴─────────┬─────────┘
             ▼                 ▼                   ▼
-      diesel_vision    diesel_localization        ...
-      L3 目标感知      L3 定位 + 地图管理
-      + 态势融合       + 配准残差
+ diesel_vision_frontend  diesel_localization      ...
+ L3 目标检测前端          L3 定位 + 地图管理
+ (装甲板/多目标识别)      + 配准残差
             │                 │
             └────────┬────────┘
                      ▼
@@ -75,8 +75,8 @@
 | 1 | `diesel_interfaces` | **X2 契约** | 全部 msg/srv/action：机内接口 + 机间态势协议 + 裁判系统消息 | 架构 | 极低 |
 | 2 | `diesel_platform` | **L1 + L2-HAL** | 时间时钟 · 数学/滤波 · 参数系统 · 日志录制 · 错误码 + 下行 HAL（底盘/云台/发射/串口/CAN/传感器封装） | 平台 | 低 |
 | 3 | `diesel_localization` | **L3** | 定位服务（内置地图 + 激光配准）· 地图管理 · 配准残差动态物体检测 | 导航 | 高 |
-| 4 | `diesel_vision` | **L3** | 目标感知（装甲板检测/跟踪）· 态势融合 · WorldSnapshot 生成 | 视觉 | 高 |
-| 5 | `diesel_auto_aim` | **L4** | 自瞄（哨兵/步兵/英雄共用）· 多源目标注入 | 视觉 | 高 |
+| 4 | `diesel_vision_frontend` | **L3** | 目标检测前端：相机取流 · 多任务检测器（装甲板/后续目标）· PnP 几何 | 视觉 | 高 |
+| 5 | `diesel_vision_backend` | **L4** | 视觉后端：多源融合 · 友军过滤 · 关联/EKF 跟踪 · 瞄准解算 · WorldSnapshot | 视觉 | 高 |
 | 6 | `diesel_navigation` | **L4** | 静态地图规划 · 动态障碍规避 · 全向控制器 | 导航 | 高 |
 | 7 | `diesel_decision` | **L5 + L2横向 + X5** | 战术层(规则/RL) · 技能层 · 安全门 · 机间协同 · 对局仿真（临时） | 决策 | 高 |
 | 8 | `diesel_robots` | **R + 地图资产** | 兵种装配根（`sentry_bringup` / `infantry_bringup`）· 参数 · 场地资产（LFS） | 集成 | 中 |
@@ -84,8 +84,13 @@
 | 10 | `diesel_ml` | **T（离线工具层）** | 训练/数据/导出产线：抽帧 · 标注管理 · 小模型预标注 · 训练 · ONNX 导出 · 模型契约（原个人仓 `ctts` 迁入） | 视觉 | 中 |
 
 > 2026-10-23 新增 `diesel_ml`：由个人仓 `ctts`（CNN Train Tools Set）迁入，保留原提交历史；
-> 职责是模型产线（数据 → 标注 → 预标注 → 训练 → 导出 → 契约），实时推理仍在 `diesel_vision`。
+> 职责是模型产线（数据 → 标注 → 预标注 → 训练 → 导出 → 契约），实时推理仍在 `diesel_vision_frontend`。
 > 因离线工具不属于 X2/L1–L5，其 `.foray-layer` 声明为 `T`；成熟期各仓编号相应顺延。
+>
+> 2026-11-14 视觉前后端分家：原 `diesel_vision`（检测 + 融合）与原 `diesel_auto_aim`（自瞄）按「前端 = 检测、后端 = 融合 + 跟踪」
+> 重划，改名为 `diesel_vision_frontend`（L3，检测器住这里，持有 OpenCV / ONNXRuntime 重依赖）与
+> `diesel_vision_backend`（L4，融合 + 跟踪 + 瞄准，只链 Eigen）。`WorldSnapshot` 改由后端生成，
+> 契约消息放 `diesel_interfaces`，避免上层反向依赖 L3 实现。
 
 ### 2.1 三处取舍
 
@@ -263,8 +268,8 @@ CI 校验：
 | `diesel_interfaces` | `msg` `srv` `action` `referee` `comms` `map` |
 | `diesel_platform` | `time` `math` `param` `log` `hal` `chassis` `gimbal` `shooter` `serial` `can` |
 | `diesel_localization` | `map` `relocalize` `icp` `residual` `tf` |
-| `diesel_vision` | `detector` `classifier` `preprocess` `tracker` `fusion` `snapshot` |
-| `diesel_auto_aim` | `detector` `tracker` `solver` `aimer` `shooter` `target` |
+| `diesel_vision_frontend` | `detector` `classifier` `preprocess` `geometry` `pnp` `camera` |
+| `diesel_vision_backend` | `fusion` `tracker` `solver` `aimer` `shooter` `snapshot` |
 | `diesel_navigation` | `planner` `controller` `costmap` `recovery` |
 | `diesel_decision` | `tactic` `skill` `safety` `gate` `comms` `rl` `sim` |
 | `diesel_robots` | `sentry` `infantry` `params` `launch` `field` |
