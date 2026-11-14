@@ -30,8 +30,8 @@
 [`diesel_interfaces`](https://github.com/ZQU-Foray/diesel_interfaces) ·
 [`diesel_platform`](https://github.com/ZQU-Foray/diesel_platform) ·
 [`diesel_localization`](https://github.com/ZQU-Foray/diesel_localization) ·
-[`diesel_vision`](https://github.com/ZQU-Foray/diesel_vision) ·
-[`diesel_auto_aim`](https://github.com/ZQU-Foray/diesel_auto_aim) ·
+[`diesel_vision_frontend`](https://github.com/ZQU-Foray/diesel_vision_frontend) ·
+[`diesel_vision_backend`](https://github.com/ZQU-Foray/diesel_vision_backend) ·
 [`diesel_navigation`](https://github.com/ZQU-Foray/diesel_navigation) ·
 [`diesel_decision`](https://github.com/ZQU-Foray/diesel_decision) ·
 [`diesel_robots`](https://github.com/ZQU-Foray/diesel_robots) ·

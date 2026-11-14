@@ -138,7 +138,7 @@ config/<robot_type>.yaml    ← 兵种 + 场景差异（sentry / standard3；sim
 
 ### 1.4 L4 功能应用层
 
-**自瞄 `auto_aim`** —— 目标源为可插拔**多源融合**；只消费融合后的目标，不关心来源：
+**视觉后端 `vision_backend`（原自瞄 `auto_aim`）** —— 目标源为可插拔**多源融合**；只消费融合后的目标，不关心来源：
 
 | 来源 | 特性 |
 |---|---|
@@ -149,6 +149,7 @@ config/<robot_type>.yaml    ← 兵种 + 场景差异（sentry / standard3；sim
 
 - 目标源必须**过滤**友军（不只是标记友军）。
 - 跟踪环仍为**硬实时**（不因人在环而放宽）。
+- 装甲板等检测识别由 L3 前端 `diesel_vision_frontend` 完成并输出逐帧 `Observation`；后端不再实现检测器，只消费观测。
 
 **导航** —— 基于机内预置地图规划 + 动态障碍规避；**不用在线 SLAM**；激光不参与避障/地形/代价地图。
 
@@ -157,6 +158,10 @@ config/<robot_type>.yaml    ← 兵种 + 场景差异（sentry / standard3；sim
 ### 1.5 L3 世界模型
 
 对外输出**唯一**世界模型 `WorldSnapshot`（区域级抽象状态，非原始传感器数据），字段带 `stamp` + 置信度 + 新鲜度。
+
+> 2026-11-14 起：L3 前端（`diesel_vision_frontend`）只输出逐帧观测 `Observation`（检测结果 + PnP 几何），
+> `WorldSnapshot` 的融合与生成上移到 L4 后端（`diesel_vision_backend`）；消息契约放 `diesel_interfaces`，
+> 消费方只依赖消息，不反向依赖 L3 实现。
 
 **定位服务**：内置先验地图 + 激光配准。因为激光只做定位 ⇒ 构成**单点故障**，故为**安全关键服务**。
 
