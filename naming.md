@@ -3,7 +3,7 @@
 > 上位机软件系统的名字是 **Diesel**。代码里的顶层命名空间标识是 `diesel`。
 > **仓库名、ROS 包名、include 根、节点名也统一为 `diesel_*` / `diesel::`**；
 > 只有 ROS 话题与 tf frame 保持生态标准名——原因写在 §3。
-> `foray` 只作为战队品牌留在组织名（`ZQU-Foray`）与非上位机仓（`foray_docs` / `foray_ml` / `foray_robots`）。
+> `foray` 只作为战队品牌留在组织名（`ZQU-Foray`）与非上位机仓（`foray_docs` / `foray_mcu` / `foray_mcu_controller` / `foray_web` / `foray-HelloWorld`）。
 >
 > 本文是组织内**唯一权威**的命名与风格规范。
 > 配套：[`repository_structure.md`](repository_structure.md)（仓拓扑与协作）、
@@ -25,7 +25,7 @@
 
 | 层 | 标识 | 取值 | 谁在用 | 能否随系统改名 |
 |---|---|---|---|---|
-| **品牌层** | 组织名与战队资产 | `ZQU-Foray` · `foray_docs` · `foray_ml` · `foray_robots` · `foray_ws` | GitHub 组织页、战队文档、训练产线 | ❌ 战队品牌，与软件系统无关 |
+| **品牌层** | 组织名与战队资产 | `ZQU-Foray` · `foray_docs` · `foray_mcu` · `foray_mcu_controller` · `foray_web` · `foray-HelloWorld` · `*-foray-fork` | GitHub 组织页、战队文档、下位机与门户仓、上游 fork | ❌ 战队品牌，与软件系统无关 |
 | **系统层** | 产品名 | **Diesel** | README、答辩材料、release tag 说明、日志头 | ✅ 就是它 |
 | **代码层** | 仓库名 · ROS 包名 · C++ namespace · include 根 · ROS 节点名 | `diesel_<domain>` · `diesel_<domain>_<module>` · `diesel::…` · `include/diesel/…` · `diesel_*` | 源码、`package.xml`、launch、`.repos`、CI、`ros2 node list` | ✅ 跟随系统层 |
 | **生态层** | ROS 话题 · tf frame | `/localization/state` · `map`/`odom`/`base_link` | Nav2、RViz、robot_state_publisher、第三方插件、外队共享接口 | ❌ 见 §3 |
@@ -59,13 +59,16 @@ diesel::<domain>::<module>::test_support ← 测试辅助
 | `foray_interfaces` | `diesel_interfaces` | 协议名本身 | —（无 ROS 包） | `diesel::<protocol>`，如 `diesel::lower_link` |
 | `foray_simulation` | `diesel_simulation` | `simulation` | `diesel_simulation_` | `diesel::simulation::bridge` |
 | `foray_navigation` | `diesel_navigation` | `navigation` | `diesel_navigation_` | `diesel::navigation::planner` |
-| `foray_vision` | `diesel_vision` | `vision` | `diesel_vision_` | `diesel::vision::detector` |
-| `foray_auto_aim` | `diesel_auto_aim` | `auto_aim` | `diesel_auto_aim_` | `diesel::auto_aim::solver` |
+| `foray_vision` + `foray_auto_aim` | `diesel_vision_frontend`（检测）/ `diesel_vision_backend`（融合 · 跟踪 · 瞄准） | `vision` | `diesel_vision_frontend_` / `diesel_vision_backend_` | `diesel::vision::frontend::…` / `diesel::vision::backend::…` |
 | `foray_decision` | `diesel_decision` | `decision` | `diesel_decision_` | `diesel::decision::tactic` |
 
-> **不参与本次改名的仓**（`foray` 作为战队品牌保留）：`foray_docs`（战队文档）、`foray_ml`（训练产线）、
-> `foray_robots`（实体机器人与上场配置）、`foray_ws`（元仓）、`foray-HelloWorld`（招呼仓）。
-> 判据是「是否属于 Diesel 上位机软件栈」——上面 8 个仓编译成一个系统，其余仓不参与编译装配。
+> **改名范围**：上表 8 个仓（视觉分家后为 9 个）连同 `foray_ml` / `foray_robots` / `foray_ws`，共 11 个上位机仓
+> 已按 P4 全部改为 `diesel_*`（2026-11-12）。`diesel_ml` / `diesel_robots` / `diesel_ws` 不参与编译装配，
+> 所以没有 namespace 与 include 根。批次与逐仓回执见 [`diesel_naming_migration.md`](diesel_naming_migration.md)。
+>
+> **不参与改名的仓**（`foray` 作为战队品牌保留）：`foray_docs`（战队文档）、`foray_mcu` / `foray_mcu_controller`（下位机）、
+> `foray_web`（门户）、`foray-HelloWorld`（招呼仓），以及上游 fork 仓 `<upstream>-foray-fork`。
+> 判据是「是否属于 Diesel 上位机软件栈」——只有上位机仓编译成一个系统，其余仓不参与编译装配。
 
 **仓名与包名规则**
 
@@ -199,11 +202,13 @@ launch 的 `package=`、每台机器 `install/` 下的目录名，都要在同�
 | `foray_interfaces` | `diesel_interfaces` |
 | `foray_simulation` | `diesel_simulation` |
 | `foray_navigation` | `diesel_navigation` |
-| `foray_vision` | `diesel_vision` |
-| `foray_auto_aim` | `diesel_auto_aim` |
+| `foray_vision` + `foray_auto_aim` | `diesel_vision_frontend`（检测）/ `diesel_vision_backend`（融合 + 跟踪 + 瞄准） |
 | `foray_decision` | `diesel_decision` |
+| `foray_ml` | `diesel_ml` |
+| `foray_robots` | `diesel_robots` |
+| `foray_ws` | `diesel_ws` |
 
-ROS 包名（现存 10 个包，只换前缀）：
+ROS 包名（P4 迁移时的 10 个包，只换前缀）：
 
 | 旧包名 | 新包名 |
 |---|---|
@@ -222,6 +227,8 @@ ROS 包名（现存 10 个包，只换前缀）：
 > 目录名 `src/<pkg>/`、launch/py 里的 `package='<pkg>'`、`.repos` 的 pin（当前工作区没有 `.repos`，将来有就必须同改）。
 > 缺一个就是 `colcon build` 找不到依赖。**改完必须 `rm -rf build install log`**——`install/` 按包名建目录，
 > 不清掉会同时留着新旧两套头文件，编译器可能吃到旧那份。执行顺序见 §6.3。
+>
+> 仿真仓后来新增 `diesel_sim_mcu` / `diesel_sim_tools` 两个包（沿用 `diesel_sim_` 前缀），不在上表里。
 
 ### 4.5 迁移前先自查
 
@@ -252,17 +259,21 @@ find . -maxdepth 3 -type d -name 'foray_*' -path '*/src/*'
 
 **用法**：新建仓直接复制这三个文件到仓根；已有仓覆盖为 canonical 版本后跑一次格式化，单独提交 `chore(style):`。
 
+> ⚠️ **落地状态（2026-11-16 核实）**：`ZQU-Foray/.github` 里还没有 `config/` 目录，CI 模板也没有
+> `namespace-guard` / `style-config` 两个作业——这两样随 [`ZQU-Foray/.github#8`](https://github.com/ZQU-Foray/.github/pull/8) 落地。
+> 在它合入之前，本节的 canonical 文件只是**目标值**，各仓仓根里的风格文件仍是各自维护的版本。
+
 ### 5.1 迁移前的实际差异（2026-11-03 盘点）
 
-> 表内用的是 2026-11-03 的现状仓名，对应新仓名见 §4.4（`foray_x` → `diesel_x`）。
+> 表内是 2026-11-03 的盘点快照（仓名已按 §4.4 改写为 `diesel_*`）；仓根文件的实际状态以各仓为准。
 
 | 仓 | `.clang-format` | `pyproject.toml` | 处理 |
 |---|---|---|---|
-| `foray_platform` | 34 行组织版 | 无 | 复制 canonical，补 pyproject |
-| `foray_simulation` | 34 行组织版 | 15 行（含 black 段） | 替换为 canonical |
-| `foray_interfaces` | 34 行组织版 | 无 | 替换为 canonical（含生成器脚本） |
-| `foray_localization` | **10 行精简版**（缺 `AllowShortIfStatements` 等） | 5 行（仅 ruff target-version） | **必须替换**，否则与其它仓格式化结果不一致 |
-| `foray_navigation` | 缺失 | 无 | 补 |
+| `diesel_platform` | 34 行组织版 | 无 | 复制 canonical，补 pyproject |
+| `diesel_simulation` | 34 行组织版 | 15 行（含 black 段） | 替换为 canonical |
+| `diesel_interfaces` | 34 行组织版 | 无 | 替换为 canonical（含生成器脚本） |
+| `diesel_localization` | **10 行精简版**（缺 `AllowShortIfStatements` 等） | 5 行（仅 ruff target-version） | **必须替换**，否则与其它仓格式化结果不一致 |
+| `diesel_navigation` | 缺失 | 无 | 补 |
 | 其余仓 | 缺失 | 无 | 建仓时复制 |
 
 ### 5.2 命名风格（语言层约定，不变）
@@ -295,17 +306,24 @@ note: 预计 11 月第三周完成
 
 > 声明文件缺失时，CI 按 `migrating` 处理并给出一条提示——**保证新仓和空仓不会因为还没改名就红**。
 
-### 6.1 各仓状态（2026-11-03，由各仓负责人更新）
+> ⚠️ **落地状态（2026-11-16 核实）**：`.diesel-naming` 目前**没有**在任何仓落地——各仓仓根放的是 `.diesel-layer`
+> （声明层级依赖，不是命名模式），CI 里也没有读它的作业。所以本节描述的是**目标机制**：
+> 迁移本身已随 P4 的 11 仓改名完成，「用声明文件收紧门禁」这件事还没开始，要等 `.github#8`。
 
-| 仓（现 → 目标） | C++ 文件数 | 现状 | mode | 负责人待办 |
-|---|---|---|---|---|
-| `foray_platform` → `diesel_platform` | 172 | `foray::platform::…`（层级已对，只换顶层） | `migrating` | 仓改名 + 3 个包改名 + 顶层 namespace / include 根 / 节点名 |
-| `foray_localization` → `diesel_localization` | 63 | `foray::localization_map/_ros/_relocalization`（**层级也要重排**） | `migrating` | 先合 PR #7/#8；仓改名 + 5 个包改名 + 按 §4 顺序改 |
-| `foray_interfaces` → `diesel_interfaces` | 0 | 协议生成器，生成代码跟模板走 | `na` | 仓改名 + 改 `scripts/gen_lower_link.py` 模板后重新生成 |
-| `foray_simulation` → `diesel_simulation` | 0 | 无 C++，2 个包（bringup / field） | `na`（仅对齐风格配置） | 仓改名 + 包改名 + 换 `.clang-format` / `pyproject.toml` |
-| `foray_navigation` → `diesel_navigation` | 0 | 骨架 | `na` | 仓改名；建包时直接用 `diesel_*` |
-| `foray_vision` / `foray_auto_aim` / `foray_decision` → `diesel_*` | 0 | 空仓 | `na` | 仓改名；首次提交即用 `diesel::` |
-| `foray_docs` / `foray_ml` / `foray_robots` / `foray_ws` | — | 非上位机软件栈 | `na` | **不改名**（`foray` 是战队品牌） |
+### 6.1 各仓状态（2026-11-16 核实）
+
+> 仓名与包名的改名已完成（P4），下表记的是**namespace / include 根**这一层还差什么。
+
+| 仓 | 现状 | 还差什么 |
+|---|---|---|
+| `diesel_platform` | 包 `diesel_platform_core` / `_driver_hikvision` / `_driver_livox`；namespace 已是 `diesel::platform::<module>`（含 `::config`、`::driver::hikvision::detail`、`::test`）；include 根 `include/diesel/platform/…` | 无（§4.1 已达标） |
+| `diesel_localization` | 5 个包已改名；namespace **仍是平铺** `diesel::localization_map` / `diesel::localization_ros` / `diesel::localization_relocalization` | 收敛成 `diesel::localization::<module>`：`git mv` 目录 + 按 §4 顺序替换 |
+| `diesel_vision_frontend` / `diesel_vision_backend` | 单包平铺：包名 `diesel_vision_backend`、namespace `diesel_vision_backend`、include 根 `include/diesel_vision_backend/` | 收敛成 `diesel::vision::frontend` / `diesel::vision::backend`；前后端分家后的目录约定要回填本文 §2.1 |
+| `diesel_interfaces` | 无手写 C++，协议生成器的产物 namespace 跟模板走（`scripts/gen_*.py`） | 无 |
+| `diesel_simulation` | 无 C++，包为 `diesel_rmul_2027_field` / `diesel_sim_mcu` / `diesel_sim_tools` / `diesel_simulation_bringup` | 无 |
+| `diesel_navigation` / `diesel_decision` | 骨架，尚无 C++ | 建包时直接用 `diesel::<domain>::<module>` |
+| `diesel_ml` / `diesel_robots` / `diesel_ws` | 已改名，非编译单元 | 无 |
+| `foray_docs` / `foray_mcu` / `foray_mcu_controller` / `foray_web` | 非上位机软件栈 | 不改名 |
 
 ### 6.2 五步迁移法（单仓，namespace 部分）
 
@@ -334,8 +352,8 @@ docker exec foray_sim_run bash -lc 'source /opt/ros/humble/setup.bash; cd /ws &&
 
 ### 6.3 仓名与包名的改名顺序
 
-**前提：先等 open PR 合完**（`foray_localization` #7 #8、`foray_platform` #2、`foray_navigation` #1、`foray_docs` #2）。
-改名会重写大量文件路径，未合并的 PR 必然冲突，rebase 的成本高于等几天。
+**前提：先等 open PR 合完**——改名会重写大量文件路径，未合并的 PR 必然冲突，rebase 的成本高于等几天。
+（P4 改名时列的那批 PR 早已合入，现在再动 namespace 层面的目录，只受当时 open 的 PR 影响。）
 
 单仓顺序：**1–5 在同一个 PR 里完成，6–7 合并后做。**
 
@@ -387,7 +405,7 @@ grep -rn 'namespace foray\|foray::' --include='*.hpp' --include='*.cpp' . | head
 ## 9. 现状速查
 
 ```text
-组织/品牌     ZQU-Foray · foray_docs / foray_ml / foray_robots   （不变）
+组织/品牌     ZQU-Foray · foray_docs / foray_mcu / foray_web     （不变）
 系统名        Diesel                                             （投票结果）
 仓库名        diesel_<domain>
 ROS 包名      diesel_<domain>_<module>
@@ -397,5 +415,5 @@ ROS 节点名    diesel_<module>
 协议 namespace diesel::<protocol>
 话题          /<module>/<entity>                                 （不变）
 tf frame      map / odom / base_link …                           （不变）
-风格配置      .github/config/ 下的三个文件（唯一源）
+风格配置      .github/config/ 下的三个文件（唯一源；待 #8 落地）
 ```

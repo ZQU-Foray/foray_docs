@@ -13,6 +13,7 @@
 | [repository_structure.md](repository_structure.md) | **仓库结构** —— 仓拓扑、切割判据、依赖方向、版本锁定、协作规范、迁移路径 |
 | [dual_stream_disentanglement.md](dual_stream_disentanglement.md) | **双流特征解耦** —— 灯条颜色 × 图案的任务解耦、非对称双流结构、训练策略与消融方案 |
 | [naming.md](naming.md) | **命名与代码风格** —— 系统名 Diesel、仓名 / ROS 包名 / namespace / include 根 / 节点名规范、只保留话题与 tf frame 不动、旧→新映射、改名顺序与各仓迁移状态 |
+| [diesel_naming_migration.md](diesel_naming_migration.md) | **命名迁移** —— 战队名 `Foray` 与系统名 `Diesel` 的边界、仓名 / ROS 包名 / C++ namespace 改名批次与验收 |
 
 **阅读顺序**：先 `algorithm_structure.md` 建立整体结构，再看 `repository_structure.md` 了解如何分工落地；视觉识别方向直接看 `dual_stream_disentanglement.md`。
 
@@ -29,15 +30,19 @@
 
 **上位机自研仓**（结构见 [`repository_structure.md`](repository_structure.md) §2）：
 
-[`foray_interfaces`](https://github.com/ZQU-Foray/foray_interfaces) ·
-[`foray_platform`](https://github.com/ZQU-Foray/foray_platform) ·
-[`foray_localization`](https://github.com/ZQU-Foray/foray_localization) ·
-[`foray_vision`](https://github.com/ZQU-Foray/foray_vision) ·
-[`foray_auto_aim`](https://github.com/ZQU-Foray/foray_auto_aim) ·
-[`foray_navigation`](https://github.com/ZQU-Foray/foray_navigation) ·
-[`foray_decision`](https://github.com/ZQU-Foray/foray_decision) ·
-[`foray_robots`](https://github.com/ZQU-Foray/foray_robots) ·
-[`foray_ws`](https://github.com/ZQU-Foray/foray_ws)
+[`diesel_interfaces`](https://github.com/ZQU-Foray/diesel_interfaces) ·
+[`diesel_platform`](https://github.com/ZQU-Foray/diesel_platform) ·
+[`diesel_localization`](https://github.com/ZQU-Foray/diesel_localization) ·
+[`diesel_vision_frontend`](https://github.com/ZQU-Foray/diesel_vision_frontend) ·
+[`diesel_vision_backend`](https://github.com/ZQU-Foray/diesel_vision_backend) ·
+[`diesel_navigation`](https://github.com/ZQU-Foray/diesel_navigation) ·
+[`diesel_decision`](https://github.com/ZQU-Foray/diesel_decision) ·
+[`diesel_robots`](https://github.com/ZQU-Foray/diesel_robots) ·
+[`diesel_ws`](https://github.com/ZQU-Foray/diesel_ws)
+
+> 上位机各仓已于 **2026-11-12** 统一改名为 `diesel_*`（P4 完成），旧 `foray_*` URL 由 GitHub 重定向；
+> 迁移批次与回执见 [`diesel_naming_migration.md`](diesel_naming_migration.md)，仓名与职责见
+> [`repository_structure.md`](repository_structure.md) §2。
 
 ---
 
