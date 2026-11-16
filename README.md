@@ -35,7 +35,9 @@
 [`diesel_navigation`](https://github.com/ZQU-Foray/diesel_navigation) ·
 [`diesel_decision`](https://github.com/ZQU-Foray/diesel_decision) ·
 [`diesel_robots`](https://github.com/ZQU-Foray/diesel_robots) ·
-[`diesel_ws`](https://github.com/ZQU-Foray/diesel_ws)
+[`diesel_ws`](https://github.com/ZQU-Foray/diesel_ws) ·
+[`diesel_ml`](https://github.com/ZQU-Foray/diesel_ml) ·
+[`diesel_simulation`](https://github.com/ZQU-Foray/diesel_simulation)
 
 > 上位机各仓已于 **2026-11-12** 统一改名为 `diesel_*`（P4 完成），旧 `foray_*` URL 由 GitHub 重定向；
 > 迁移批次与回执见 [`diesel_naming_migration.md`](diesel_naming_migration.md)，仓名与职责见
